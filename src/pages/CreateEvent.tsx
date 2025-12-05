@@ -38,14 +38,6 @@ export default function CreateEvent() {
           className="max-w-2xl mx-auto"
         >
           <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', bounce: 0.5 }}
-              className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center"
-            >
-              <Sparkles className="w-8 h-8 text-primary" />
-            </motion.div>
             <h1 className="text-3xl font-bold mb-2">Create Your Event</h1>
             <p className="text-muted-foreground">
               Let AI help you find the perfect guest combinations

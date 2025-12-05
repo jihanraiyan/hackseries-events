@@ -78,8 +78,8 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
       ctx.beginPath();
       ctx.arc(x, y, size * scale + 8, 0, 2 * Math.PI);
       const gradient = ctx.createRadialGradient(x, y, size * scale, x, y, size * scale + 15);
-      gradient.addColorStop(0, 'rgba(0, 217, 160, 0.4)');
-      gradient.addColorStop(1, 'rgba(0, 217, 160, 0)');
+      gradient.addColorStop(0, 'rgba(0, 180, 130, 0.5)');
+      gradient.addColorStop(1, 'rgba(0, 180, 130, 0)');
       ctx.fillStyle = gradient;
       ctx.fill();
     }
@@ -99,9 +99,9 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
     if (graphNode.img && graphNode.img.complete) {
       ctx.drawImage(graphNode.img, x - size * scale, y - size * scale, size * 2 * scale, size * 2 * scale);
     } else {
-      ctx.fillStyle = '#2a2a3a';
+      ctx.fillStyle = '#e5e5e5';
       ctx.fill();
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = '#333';
       ctx.font = `${14 * scale}px Space Grotesk`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -114,7 +114,7 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
       ctx.font = `${isHovered ? 12 : 10}px Space Grotesk`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = isHovered ? '#fff' : 'rgba(255,255,255,0.8)';
+      ctx.fillStyle = isHovered ? '#000' : 'rgba(0,0,0,0.7)';
       ctx.fillText(graphNode.name.split(' ')[0], x, y + size * scale + 5);
     }
   }, [hoveredNode]);

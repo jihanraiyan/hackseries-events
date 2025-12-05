@@ -46,16 +46,7 @@ export default function Index() {
               transition={{ duration: 0.6 }}
               className="max-w-3xl mx-auto text-center"
             >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', bounce: 0.5, delay: 0.2 }}
-                className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center glow-primary"
-              >
-                <Sparkles className="w-10 h-10 text-primary" />
-              </motion.div>
-              
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                 Predict Event Chemistry
                 <span className="text-gradient-primary"> Before It Happens</span>
               </h1>
