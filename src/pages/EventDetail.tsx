@@ -187,7 +187,10 @@ export default function EventDetail() {
                     <Pencil className="w-4 h-4 mr-2" />
                     Edit Event
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Manage Guests</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/guest-builder?eventId=${eventId}`)}>
+                    <Users className="w-4 h-4 mr-2" />
+                    Manage Guests
+                  </DropdownMenuItem>
                   <DropdownMenuItem>Send Reminders</DropdownMenuItem>
                   <DropdownMenuItem className="text-destructive">Cancel Event</DropdownMenuItem>
                 </DropdownMenuContent>
