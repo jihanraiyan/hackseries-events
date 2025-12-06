@@ -134,22 +134,6 @@ export default function PrivacyDashboard() {
           )}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20"
-        >
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-sm">Privacy First</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                We never read message content. Only behavioral patterns like response times and conversation flow are analyzed.
-              </p>
-            </div>
-          </div>
-        </motion.div>
       </motion.div>
     </div>
   );
