@@ -56,7 +56,7 @@ export default function CreateEvent() {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container pt-24 pb-12 px-4">
+      <main className="container pt-28 sm:pt-24 pb-12 px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
