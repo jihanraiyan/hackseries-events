@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { CommunicationProfile } from '@/types/event';
-import { X, Linkedin, Users } from 'lucide-react';
+import { X, Linkedin, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { mockProfiles } from '@/data/mockEventData';
 import { useMemo } from 'react';
@@ -30,16 +30,15 @@ export default function ProfileView({ profile, onClose }: ProfileViewProps) {
   // Generate connection nodes for the background graph
   const connectionNodes = useMemo(() => {
     const nodes: ConnectionNode[] = [];
-    const connections = mockProfiles.filter(p => p.userId !== profile.userId).slice(0, 12);
+    const connections = mockProfiles.filter(p => p.userId !== profile.userId).slice(0, 10);
     
-    // Distribute nodes in a scattered pattern on the right side
     connections.forEach((conn, i) => {
       const angle = (i / connections.length) * Math.PI * 2;
-      const radius = 150 + Math.random() * 150;
+      const radius = 200 + Math.random() * 100;
       nodes.push({
         id: conn.userId,
-        x: 50 + Math.cos(angle) * radius + Math.random() * 80,
-        y: 50 + Math.sin(angle) * radius + Math.random() * 80,
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius,
         avatar: conn.connectionDegree === 1 ? conn.avatar : undefined,
         name: conn.name,
       });
@@ -53,139 +52,134 @@ export default function ProfileView({ profile, onClose }: ProfileViewProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 bg-background"
       onClick={onClose}
     >
-      <div className="h-full w-full relative overflow-hidden" onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
-          <h1 className="text-lg font-medium text-muted-foreground">Profile Preview</h1>
-        </div>
+      {/* Header */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
+        <h1 className="text-sm font-medium text-muted-foreground">Profile Preview</h1>
+      </div>
 
-        {/* Close button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full"
-        >
-          <X className="h-5 w-5" />
-        </Button>
+      {/* Close button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onClose}
+        className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full"
+      >
+        <X className="h-5 w-5" />
+      </Button>
 
-        {/* Social Graph Background */}
-        <div className="absolute inset-0 overflow-hidden">
-          <svg className="absolute inset-0 w-full h-full pointer-events-none">
-            {/* Connection lines from center to nodes */}
+      {/* Centered Content */}
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="relative" onClick={e => e.stopPropagation()}>
+          {/* Social Graph Background */}
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Connection lines */}
+            <svg className="absolute w-[600px] h-[600px] -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
+              {connectionNodes.map((node, i) => (
+                <motion.line
+                  key={`line-${node.id}`}
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 0.15 }}
+                  transition={{ delay: 0.3 + i * 0.05, duration: 0.5 }}
+                  x1="50%"
+                  y1="50%"
+                  x2={`calc(50% + ${node.x}px)`}
+                  y2={`calc(50% + ${node.y}px)`}
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  className="text-border"
+                />
+              ))}
+            </svg>
+
+            {/* Connection Nodes */}
             {connectionNodes.map((node, i) => (
-              <motion.line
-                key={`line-${node.id}`}
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 0.1 }}
-                transition={{ delay: i * 0.05, duration: 0.5 }}
-                x1="50%"
-                y1="50%"
-                x2={`calc(50% + ${node.x}px)`}
-                y2={`calc(50% + ${node.y - 200}px)`}
-                stroke="currentColor"
-                strokeWidth="1"
-                className="text-border"
-              />
+              <motion.div
+                key={node.id}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.4 + i * 0.05, type: 'spring', stiffness: 200 }}
+                className="absolute w-10 h-10 rounded-full bg-card border border-border shadow-sm flex items-center justify-center overflow-hidden"
+                style={{
+                  left: `calc(50% + ${node.x}px)`,
+                  top: `calc(50% + ${node.y}px)`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                {node.avatar ? (
+                  <img src={node.avatar} alt={node.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                    <span className="text-muted-foreground text-xs">?</span>
+                  </div>
+                )}
+              </motion.div>
             ))}
-          </svg>
+          </div>
 
-          {/* Connection Nodes */}
-          {connectionNodes.map((node, i) => (
-            <motion.div
-              key={node.id}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2 + i * 0.05, type: 'spring', stiffness: 200 }}
-              className="absolute w-12 h-12 rounded-full bg-card border border-border shadow-sm flex items-center justify-center overflow-hidden"
-              style={{
-                left: `calc(50% + ${node.x}px)`,
-                top: `calc(50% + ${node.y - 200}px)`,
-                transform: 'translate(-50%, -50%)',
-              }}
-            >
-              {node.avatar ? (
-                <img src={node.avatar} alt={node.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <span className="text-muted-foreground text-xs">?</span>
-                </div>
-              )}
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Profile Card */}
-        <motion.div
-          initial={{ opacity: 0, x: -50, scale: 0.95 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-          className="absolute left-8 top-1/2 -translate-y-1/2 bg-card rounded-2xl shadow-xl border border-border p-6 w-full max-w-sm"
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Name */}
-          <h2 className="text-2xl font-bold text-foreground mb-4">{profile.name}</h2>
-
-          {/* Large Photo with age badge */}
-          <div className="relative mb-4">
-            <img
-              src={profile.avatar}
-              alt={profile.name}
-              className="w-full aspect-square object-cover rounded-xl"
-            />
-            {/* Age badge */}
-            <div className="absolute bottom-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-1.5">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{profile.age}</span>
-            </div>
-            
+          {/* Profile Card */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200 }}
+            className="relative bg-card rounded-2xl shadow-xl border border-border p-6 w-80 z-10"
+          >
             {/* Connection degree badge */}
-            <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur-sm rounded-full px-3 py-1">
+            <div className="absolute -top-3 right-4 bg-primary rounded-full px-3 py-1">
               <span className="text-xs font-medium text-primary-foreground">
                 {getConnectionLabel(profile.connectionDegree)} connection
               </span>
             </div>
-          </div>
 
-          {/* Role and Company */}
-          <div className="mb-3">
+            {/* Name */}
+            <h2 className="text-2xl font-bold text-foreground mb-4">{profile.name}</h2>
+
+            {/* Photo with age badge */}
+            <div className="relative mb-4">
+              <img
+                src={profile.avatar}
+                alt={profile.name}
+                className="w-full aspect-square object-cover rounded-xl"
+              />
+              <div className="absolute bottom-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{profile.age}</span>
+              </div>
+            </div>
+
+            {/* Role and Company */}
             <p className="text-sm font-medium text-foreground">{profile.role}</p>
-            <p className="text-sm text-muted-foreground">{profile.company}</p>
-          </div>
+            <p className="text-sm text-muted-foreground mb-1">{profile.company}</p>
+            <p className="text-sm text-muted-foreground mb-4">{profile.school}</p>
 
-          {/* School */}
-          <p className="text-sm text-muted-foreground mb-4">{profile.school}</p>
-
-          {/* Bio section */}
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Bio</p>
-              <p className="text-sm text-foreground leading-relaxed">"{profile.bio}"</p>
+            {/* Bio section */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Bio</p>
+                <p className="text-sm text-foreground leading-relaxed">"{profile.bio}"</p>
+              </div>
+              
+              {profile.linkedinUrl && (
+                <a
+                  href={profile.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 text-[#0A66C2] hover:opacity-80 transition-opacity"
+                >
+                  <Linkedin className="h-6 w-6" />
+                </a>
+              )}
             </div>
-            
-            {/* LinkedIn icon */}
-            {profile.linkedinUrl && (
-              <a
-                href={profile.linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shrink-0 text-[#0A66C2] hover:opacity-80 transition-opacity"
-              >
-                <Linkedin className="h-6 w-6" />
-              </a>
+
+            {profile.alreadyKnow && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-xs text-primary font-medium">✓ You already know each other</p>
+              </div>
             )}
-          </div>
-
-          {/* Already know indicator */}
-          {profile.alreadyKnow && (
-            <div className="mt-4 pt-4 border-t border-border">
-              <p className="text-xs text-primary font-medium">✓ You already know each other</p>
-            </div>
-          )}
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </motion.div>
   );
