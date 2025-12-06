@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Users, Plus, Clock, MapPin, Check, X, MoreHorizontal } from 'lucide-react';
+import { Calendar, Users, Plus, Clock, MapPin, Check, X, MoreHorizontal, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -24,16 +24,17 @@ interface EventCardProps {
     location?: string;
     guestCount: number;
     maxAttendees: number;
+    coverImage?: string;
     coverGradient?: string;
     host?: string;
     rsvpStatus?: 'going' | 'maybe' | 'pending';
   };
   isHosted?: boolean;
+  onEdit?: (id: string) => void;
 }
 
-function EventCard({ event, isHosted = false }: EventCardProps) {
+function EventCard({ event, isHosted = false, onEdit }: EventCardProps) {
   const isPast = event.date < new Date();
-  const isUpcoming = !isPast;
 
   return (
     <motion.div
@@ -45,12 +46,22 @@ function EventCard({ event, isHosted = false }: EventCardProps) {
         <div className={`rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-border transition-all hover:shadow-lg ${isPast ? 'opacity-60' : ''}`}>
           {/* Cover */}
           <div className="relative h-32 sm:h-40 overflow-hidden">
-            <div className={`absolute inset-0 ${
-              event.coverGradient || 'bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30'
-            }`} />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Calendar className="w-12 h-12 text-foreground/10" />
-            </div>
+            {event.coverImage ? (
+              <img 
+                src={event.coverImage} 
+                alt={event.title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <>
+                <div className={`absolute inset-0 ${
+                  event.coverGradient || 'bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30'
+                }`} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Calendar className="w-12 h-12 text-foreground/10" />
+                </div>
+              </>
+            )}
             
             {/* Date Badge */}
             <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center min-w-[52px]">
@@ -78,16 +89,22 @@ function EventCard({ event, isHosted = false }: EventCardProps) {
             {isHosted && (
               <div className="absolute top-3 right-3">
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
                     <Button size="icon" variant="secondary" className="h-8 w-8 bg-background/90 backdrop-blur-sm">
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Edit Event</DropdownMenuItem>
-                    <DropdownMenuItem>Manage Guests</DropdownMenuItem>
-                    <DropdownMenuItem>Send Reminders</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">Cancel Event</DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => {
+                      e.preventDefault();
+                      onEdit?.(event.id);
+                    }}>
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Edit Event
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => e.preventDefault()}>Manage Guests</DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => e.preventDefault()}>Send Reminders</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive" onClick={(e) => e.preventDefault()}>Cancel Event</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -154,10 +171,12 @@ function EventCard({ event, isHosted = false }: EventCardProps) {
 }
 
 export default function EventDashboard() {
-  // Your hosted events with unique gradients
-  const gradients = [
-    'bg-gradient-to-br from-primary/40 via-primary/20 to-secondary/30',
-    'bg-gradient-to-br from-secondary/40 via-accent/20 to-primary/30',
+  const navigate = useNavigate();
+
+  // Cover images for hosted events
+  const coverImages = [
+    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop',
   ];
 
   const hostedEvents = mockEvents.map((event, i) => ({
@@ -168,8 +187,12 @@ export default function EventDashboard() {
     location: 'New York, NY',
     guestCount: 5 + i * 2,
     maxAttendees: event.maxAttendees,
-    coverGradient: gradients[i % gradients.length],
+    coverImage: coverImages[i % coverImages.length],
   }));
+
+  const handleEditEvent = (eventId: string) => {
+    navigate(`/events/${eventId}/edit`);
+  };
 
   // Events you're invited to
   const invitedEvents = [
@@ -183,7 +206,7 @@ export default function EventDashboard() {
       maxAttendees: 40,
       host: 'Sarah Chen',
       rsvpStatus: 'pending' as const,
-      coverGradient: 'bg-gradient-to-br from-orange-500/30 via-pink-500/20 to-purple-500/30',
+      coverImage: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&auto=format&fit=crop',
     },
     {
       id: 'inv-2',
@@ -195,7 +218,7 @@ export default function EventDashboard() {
       maxAttendees: 15,
       host: 'Alex Rivera',
       rsvpStatus: 'going' as const,
-      coverGradient: 'bg-gradient-to-br from-blue-500/30 via-cyan-500/20 to-teal-500/30',
+      coverImage: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=800&auto=format&fit=crop',
     },
     {
       id: 'inv-3',
@@ -207,7 +230,7 @@ export default function EventDashboard() {
       maxAttendees: 50,
       host: 'Maya Johnson',
       rsvpStatus: 'maybe' as const,
-      coverGradient: 'bg-gradient-to-br from-violet-500/30 via-fuchsia-500/20 to-pink-500/30',
+      coverImage: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&auto=format&fit=crop',
     },
   ];
 
@@ -258,7 +281,7 @@ export default function EventDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <EventCard event={event} isHosted />
+                    <EventCard event={event} isHosted onEdit={handleEditEvent} />
                   </motion.div>
                 ))}
               </div>
