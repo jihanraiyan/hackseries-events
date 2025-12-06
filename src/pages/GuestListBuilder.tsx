@@ -195,7 +195,7 @@ export default function GuestListBuilder() {
   };
 
   // Get dimensions for the graph
-  const [graphSize, setGraphSize] = useState({ width: 500, height: 400 });
+  const [graphSize, setGraphSize] = useState({ width: 500, height: 450 });
   
   useEffect(() => {
     const updateSize = () => {
@@ -203,7 +203,7 @@ export default function GuestListBuilder() {
       if (rightPanel) {
         setGraphSize({
           width: Math.min(rightPanel.clientWidth - 32, 600),
-          height: 350
+          height: 450
         });
       }
     };
@@ -310,17 +310,17 @@ export default function GuestListBuilder() {
 
                 <TabsContent value="chemistry" className="flex-1 flex flex-col mt-0">
                   {/* Chemistry Score */}
-                  <div className="text-center mb-4">
+                  <div className="text-center mb-2">
                     <ChemistryScore score={analysis.groupScore} size="lg" />
                   </div>
 
-                  {/* Graph */}
-                  <div className="flex-1 min-h-[250px] bg-secondary/50 rounded-xl mb-4">
+                  {/* Graph - expanded to fill space */}
+                  <div className="flex-1 min-h-[350px] bg-secondary/50 rounded-xl mb-3">
                     <ChemistryGraph
                       guests={selectedGuests}
                       analysis={analysis}
                       width={graphSize.width}
-                      height={Math.min(graphSize.height, 280)}
+                      height={Math.max(graphSize.height, 350)}
                     />
                   </div>
 
