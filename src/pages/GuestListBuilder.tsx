@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Sparkles, Send, Wand2, Filter, ChevronRight, Calendar, Zap, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -34,11 +34,17 @@ const existingEventGuests: Record<string, string[]> = {
   'event-2': ['user-4', 'user-6', 'user-7', 'user-9', 'user-10', 'user-11', 'user-12'],
 };
 
+interface LocationState {
+  selectedGuests?: CommunicationProfile[];
+}
+
 export default function GuestListBuilder() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('eventId');
   const isEditMode = !!eventId;
+  const locationState = location.state as LocationState | null;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGuests, setSelectedGuests] = useState<CommunicationProfile[]>([]);
@@ -59,14 +65,16 @@ export default function GuestListBuilder() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Load existing guests if editing an event
+  // Load guests from location state (preserved from CreateEvent) or existing event
   useEffect(() => {
-    if (eventId && existingEventGuests[eventId]) {
+    if (locationState?.selectedGuests && locationState.selectedGuests.length > 0) {
+      setSelectedGuests(locationState.selectedGuests);
+    } else if (eventId && existingEventGuests[eventId]) {
       const guestIds = existingEventGuests[eventId];
       const guests = mockProfiles.filter(p => guestIds.includes(p.userId));
       setSelectedGuests(guests);
     }
-  }, [eventId]);
+  }, [eventId, locationState]);
 
   const filteredProfiles = useMemo(() => {
     return mockProfiles.filter(profile => {

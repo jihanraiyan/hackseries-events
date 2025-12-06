@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Users, Globe, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,17 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { CoverImagePicker } from '@/components/CoverImagePicker';
 import Navbar from '@/components/Navbar';
+import { CommunicationProfile } from '@/types/event';
+
+interface LocationState {
+  preserveGuests?: boolean;
+  selectedGuests?: CommunicationProfile[];
+}
 
 export default function CreateEvent() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as LocationState | null;
   // Pre-fill with example event for demo
   const getDefaultDate = () => {
     const date = new Date();
@@ -29,11 +37,19 @@ export default function CreateEvent() {
     coverImage: '',
   });
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Store in sessionStorage for demo
     sessionStorage.setItem('newEvent', JSON.stringify(formData));
-    navigate('/guest-builder');
+    // Pass preserved guests if they exist
+    navigate('/guest-builder', { 
+      state: state?.preserveGuests ? { selectedGuests: state.selectedGuests } : undefined 
+    });
   };
 
   return (
