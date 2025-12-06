@@ -1,12 +1,25 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Calendar, Star } from 'lucide-react';
+import { Users, Calendar, Star, Clock, Pencil, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CommunicationProfile } from '@/types/event';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+
+interface EventDateTime {
+  date: string;
+  time: string;
+}
 
 interface AvailabilityHeatmapProps {
   guests: CommunicationProfile[];
   suggestedTime?: { day: string; slot: string } | null;
+  eventDateTime?: EventDateTime;
+  onEventDateTimeChange?: (dateTime: EventDateTime) => void;
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -64,7 +77,33 @@ export function getBestTimeSlot(guests: CommunicationProfile[]): { day: string; 
   return bestSlot ? { day: bestSlot.day, slot: TIME_SLOTS[bestSlot.slotIndex], count: bestSlot.count } : null;
 }
 
-export default function AvailabilityHeatmap({ guests, suggestedTime }: AvailabilityHeatmapProps) {
+export default function AvailabilityHeatmap({ guests, suggestedTime, eventDateTime, onEventDateTimeChange }: AvailabilityHeatmapProps) {
+  const [isEditingDateTime, setIsEditingDateTime] = useState(false);
+  const [editDate, setEditDate] = useState<Date | undefined>(
+    eventDateTime?.date ? new Date(eventDateTime.date) : undefined
+  );
+  const [editTime, setEditTime] = useState(eventDateTime?.time || '19:00');
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  // Sync with external eventDateTime prop
+  useEffect(() => {
+    if (eventDateTime?.date) {
+      setEditDate(new Date(eventDateTime.date));
+    }
+    if (eventDateTime?.time) {
+      setEditTime(eventDateTime.time);
+    }
+  }, [eventDateTime]);
+
+  const handleSaveDateTime = () => {
+    if (editDate && onEventDateTimeChange) {
+      onEventDateTimeChange({
+        date: format(editDate, 'yyyy-MM-dd'),
+        time: editTime
+      });
+    }
+    setIsEditingDateTime(false);
+  };
   const { heatmapData, bestSlots } = useMemo(() => {
     const data: Record<string, number[]> = {};
     
@@ -138,6 +177,90 @@ export default function AvailabilityHeatmap({ guests, suggestedTime }: Availabil
       animate={{ opacity: 1, y: 0 }}
       className="rounded-xl border bg-card p-4"
     >
+      {/* Event Date/Time Editor */}
+      {eventDateTime && (
+        <div className="mb-4 p-3 bg-secondary/50 rounded-lg border border-border">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Event Date & Time</span>
+            </div>
+            {!isEditingDateTime ? (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-7 px-2"
+                onClick={() => setIsEditingDateTime(true)}
+              >
+                <Pencil className="w-3 h-3 mr-1" />
+                Edit
+              </Button>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-7 px-2 text-green-600"
+                onClick={handleSaveDateTime}
+              >
+                <Check className="w-3 h-3 mr-1" />
+                Save
+              </Button>
+            )}
+          </div>
+          
+          {!isEditingDateTime ? (
+            <div className="text-sm text-muted-foreground">
+              {editDate ? format(editDate, 'EEEE, MMMM d, yyyy') : 'No date set'} at {editTime}
+            </div>
+          ) : (
+            <div className="flex gap-3 items-end">
+              <div className="flex-1">
+                <Label className="text-xs mb-1 block">Date</Label>
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-9",
+                        !editDate && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="w-3 h-3 mr-2" />
+                      {editDate ? format(editDate, 'MMM d, yyyy') : 'Pick date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={editDate}
+                      onSelect={(date) => {
+                        setEditDate(date);
+                        setCalendarOpen(false);
+                      }}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="w-24">
+                <Label className="text-xs mb-1 block">Time</Label>
+                <div className="relative">
+                  <Clock className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                  <Input
+                    type="time"
+                    value={editTime}
+                    onChange={(e) => setEditTime(e.target.value)}
+                    className="pl-7 h-9 text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-foreground" />
