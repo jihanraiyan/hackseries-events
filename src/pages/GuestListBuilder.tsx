@@ -328,7 +328,7 @@ export default function GuestListBuilder() {
                   <InsightsPanel analysis={analysis} />
                 </TabsContent>
 
-                <TabsContent value="availability" className="flex-1 flex flex-col gap-4 mt-0 overflow-y-auto">
+                <TabsContent value="availability" className="mt-0">
                   <AvailabilityHeatmap 
                     guests={selectedGuests} 
                     suggestedTime={suggestedTime}
