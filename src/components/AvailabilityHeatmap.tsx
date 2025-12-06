@@ -230,7 +230,7 @@ export default function AvailabilityHeatmap({ guests, suggestedTime, eventDateTi
                       {editDate ? format(editDate, 'MMM d, yyyy') : 'Pick date'}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 rounded" align="start">
                     <CalendarComponent
                       mode="single"
                       selected={editDate}
@@ -239,7 +239,13 @@ export default function AvailabilityHeatmap({ guests, suggestedTime, eventDateTi
                         setCalendarOpen(false);
                       }}
                       initialFocus
-                      className={cn("p-3 pointer-events-auto")}
+                      className={cn("p-3 pointer-events-auto rounded")}
+                      classNames={{
+                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded",
+                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded",
+                        day_today: "bg-accent text-accent-foreground rounded",
+                        nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 rounded border border-input",
+                      }}
                     />
                   </PopoverContent>
                 </Popover>
