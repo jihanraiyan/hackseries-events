@@ -1,0 +1,206 @@
+import { useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { Users, Calendar, Clock, Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { CommunicationProfile } from '@/types/event';
+
+interface AvailabilityHeatmapProps {
+  guests: CommunicationProfile[];
+  userAvailability: Record<string, boolean[]>;
+}
+
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const TIME_SLOTS = [
+  '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm'
+];
+
+// Generate mock availability for guests
+function generateGuestAvailability(guestId: string): Record<string, boolean[]> {
+  const availability: Record<string, boolean[]> = {};
+  const seed = guestId.charCodeAt(0) + guestId.charCodeAt(guestId.length - 1);
+  
+  DAYS.forEach((day, dayIndex) => {
+    availability[day] = TIME_SLOTS.map((_, slotIndex) => {
+      // Create semi-random but consistent availability
+      const hash = (seed * (dayIndex + 1) * (slotIndex + 1)) % 100;
+      // Evenings and weekends more likely
+      const bonus = (slotIndex >= 8 ? 20 : 0) + (dayIndex >= 5 ? 15 : 0);
+      return hash + bonus > 50;
+    });
+  });
+  
+  return availability;
+}
+
+export default function AvailabilityHeatmap({ guests, userAvailability }: AvailabilityHeatmapProps) {
+  const { heatmapData, bestSlots } = useMemo(() => {
+    const totalPeople = guests.length + 1; // +1 for the user
+    const data: Record<string, number[]> = {};
+    
+    // Initialize with zeros
+    DAYS.forEach(day => {
+      data[day] = new Array(TIME_SLOTS.length).fill(0);
+    });
+    
+    // Add user availability
+    DAYS.forEach(day => {
+      TIME_SLOTS.forEach((_, slotIndex) => {
+        if (userAvailability[day]?.[slotIndex]) {
+          data[day][slotIndex]++;
+        }
+      });
+    });
+    
+    // Add guest availability
+    guests.forEach(guest => {
+      const guestAvail = generateGuestAvailability(guest.userId);
+      DAYS.forEach(day => {
+        TIME_SLOTS.forEach((_, slotIndex) => {
+          if (guestAvail[day]?.[slotIndex]) {
+            data[day][slotIndex]++;
+          }
+        });
+      });
+    });
+    
+    // Find best slots
+    const slots: { day: string; slotIndex: number; count: number }[] = [];
+    DAYS.forEach(day => {
+      TIME_SLOTS.forEach((_, slotIndex) => {
+        slots.push({ day, slotIndex, count: data[day][slotIndex] });
+      });
+    });
+    
+    const best = slots
+      .filter(s => s.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+    
+    return { heatmapData: data, bestSlots: best, totalPeople };
+  }, [guests, userAvailability]);
+
+  const totalPeople = guests.length + 1;
+
+  const getHeatColor = (count: number) => {
+    if (count === 0) return 'bg-muted/30';
+    const percentage = count / totalPeople;
+    if (percentage >= 0.9) return 'bg-green-500';
+    if (percentage >= 0.7) return 'bg-green-400';
+    if (percentage >= 0.5) return 'bg-yellow-400';
+    if (percentage >= 0.3) return 'bg-orange-400';
+    return 'bg-orange-300';
+  };
+
+  if (guests.length === 0) {
+    return (
+      <div className="glass rounded-lg p-6 text-center">
+        <Calendar className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground">
+          Select guests to see group availability
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="glass rounded-lg p-4"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-sm">Group Availability</h3>
+        </div>
+        <span className="text-xs text-muted-foreground">
+          {guests.length + 1} people
+        </span>
+      </div>
+
+      {/* Best times */}
+      {bestSlots.length > 0 && (
+        <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+          <div className="flex items-center gap-2 mb-2">
+            <Star className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium">Best Times to Meet</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {bestSlots.map((slot, i) => (
+              <div
+                key={i}
+                className="px-2 py-1 bg-primary/20 rounded text-xs font-medium"
+              >
+                {slot.day} {TIME_SLOTS[slot.slotIndex]} ({slot.count}/{totalPeople})
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Heatmap grid */}
+      <div className="flex gap-1">
+        {/* Time labels */}
+        <div className="flex flex-col gap-0.5 pr-1">
+          <div className="h-5" />
+          {TIME_SLOTS.map((time) => (
+            <div key={time} className="h-5 text-[10px] text-muted-foreground flex items-center justify-end pr-1">
+              {time}
+            </div>
+          ))}
+        </div>
+
+        {/* Day columns */}
+        {DAYS.map((day) => (
+          <div key={day} className="flex-1 flex flex-col gap-0.5">
+            <div className="h-5 text-[10px] font-medium text-center">{day}</div>
+            {TIME_SLOTS.map((_, slotIndex) => {
+              const count = heatmapData[day][slotIndex];
+              const isBestSlot = bestSlots.some(
+                s => s.day === day && s.slotIndex === slotIndex
+              );
+              return (
+                <motion.div
+                  key={slotIndex}
+                  className={cn(
+                    "h-5 rounded-sm relative group",
+                    getHeatColor(count),
+                    isBestSlot && "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                  )}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: (DAYS.indexOf(day) * TIME_SLOTS.length + slotIndex) * 0.005 }}
+                >
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-popover text-popover-foreground text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    {count}/{totalPeople} available
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-center gap-4 mt-4">
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-sm bg-muted/30" />
+          <span className="text-[10px] text-muted-foreground">None</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-sm bg-orange-300" />
+          <span className="text-[10px] text-muted-foreground">Few</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-sm bg-yellow-400" />
+          <span className="text-[10px] text-muted-foreground">Half</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-sm bg-green-500" />
+          <span className="text-[10px] text-muted-foreground">All</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

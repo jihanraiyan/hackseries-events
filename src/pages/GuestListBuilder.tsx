@@ -1,12 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Sparkles, Send, Wand2, Filter, ChevronRight } from 'lucide-react';
+import { Search, Sparkles, Send, Wand2, Filter, ChevronRight, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,8 @@ import ChemistryScore from '@/components/ChemistryScore';
 import GuestCard from '@/components/GuestCard';
 import InsightsPanel from '@/components/InsightsPanel';
 import ProfileView from '@/components/ProfileView';
+import AvailabilityPicker from '@/components/AvailabilityPicker';
+import AvailabilityHeatmap from '@/components/AvailabilityHeatmap';
 import { mockProfiles } from '@/data/mockEventData';
 import { CommunicationProfile } from '@/types/event';
 import { calculateGroupChemistry, optimizeGuestList } from '@/services/chemistryCalculator';
@@ -38,6 +41,8 @@ export default function GuestListBuilder() {
   const [inviteMessage, setInviteMessage] = useState(
     `Hey [Name]! You're invited to an exclusive event with fellow [School] alumni. Based on your profile, we think you'd be a great fit!`
   );
+  const [userAvailability, setUserAvailability] = useState<Record<string, boolean[]>>({});
+  const [activeTab, setActiveTab] = useState('chemistry');
 
   const filteredProfiles = useMemo(() => {
     return mockProfiles.filter(profile => {
@@ -203,23 +208,46 @@ export default function GuestListBuilder() {
             className="flex flex-col"
           >
             <div className="glass rounded-xl p-6 flex-1 flex flex-col">
-              {/* Chemistry Score */}
-              <div className="text-center mb-6">
-                <ChemistryScore score={analysis.groupScore} size="lg" />
-              </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="chemistry">Chemistry</TabsTrigger>
+                  <TabsTrigger value="availability" className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    Availability
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* Graph */}
-              <div className="flex-1 min-h-[300px] bg-background/30 rounded-lg mb-4">
-                <ChemistryGraph
-                  guests={selectedGuests}
-                  analysis={analysis}
-                  width={graphSize.width}
-                  height={graphSize.height}
-                />
-              </div>
+                <TabsContent value="chemistry" className="flex-1 flex flex-col mt-0">
+                  {/* Chemistry Score */}
+                  <div className="text-center mb-4">
+                    <ChemistryScore score={analysis.groupScore} size="lg" />
+                  </div>
 
-              {/* Insights */}
-              <InsightsPanel analysis={analysis} />
+                  {/* Graph */}
+                  <div className="flex-1 min-h-[250px] bg-background/30 rounded-lg mb-4">
+                    <ChemistryGraph
+                      guests={selectedGuests}
+                      analysis={analysis}
+                      width={graphSize.width}
+                      height={Math.min(graphSize.height, 280)}
+                    />
+                  </div>
+
+                  {/* Insights */}
+                  <InsightsPanel analysis={analysis} />
+                </TabsContent>
+
+                <TabsContent value="availability" className="flex-1 flex flex-col gap-4 mt-0">
+                  <AvailabilityPicker 
+                    availability={userAvailability} 
+                    onChange={setUserAvailability} 
+                  />
+                  <AvailabilityHeatmap 
+                    guests={selectedGuests} 
+                    userAvailability={userAvailability} 
+                  />
+                </TabsContent>
+              </Tabs>
 
               {/* Actions */}
               <div className="flex gap-3 mt-4">
