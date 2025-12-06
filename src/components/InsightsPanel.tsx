@@ -11,9 +11,9 @@ export default function InsightsPanel({ analysis }: InsightsPanelProps) {
 
   if (!hasContent) {
     return (
-      <div className="glass rounded-lg p-4">
-        <h3 className="font-semibold mb-3 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary" />
+      <div className="rounded-xl border bg-card p-4">
+        <h3 className="font-medium mb-3 flex items-center gap-2">
+          <Sparkles className="w-4 h-4" />
           Chemistry Insights
         </h3>
         <p className="text-sm text-muted-foreground">
@@ -24,9 +24,9 @@ export default function InsightsPanel({ analysis }: InsightsPanelProps) {
   }
 
   return (
-    <div className="glass rounded-lg p-4">
-      <h3 className="font-semibold mb-3 flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-primary" />
+    <div className="rounded-xl border bg-card p-4">
+      <h3 className="font-medium mb-3 flex items-center gap-2">
+        <Sparkles className="w-4 h-4" />
         Chemistry Insights
       </h3>
       

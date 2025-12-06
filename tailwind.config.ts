@@ -66,7 +66,9 @@ export default {
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
+        sm: 'calc(var(--radius) - 4px)',
+        xl: '1rem',
+        '2xl': '1.5rem'
       },
       keyframes: {
         'accordion-down': {
@@ -83,8 +85,8 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out'
       },
       fontFamily: {
-        sans: ['Space Grotesk', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        mono: ['Space Mono', 'ui-monospace', 'monospace']
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        serif: ['Instrument Serif', 'Georgia', 'serif']
       }
     }
   },

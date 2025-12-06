@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Calendar, PlusCircle, User, Sparkles } from 'lucide-react';
+import { Home, Calendar, PlusCircle, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function Navbar() {
@@ -13,10 +13,10 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass-dark">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background">
       <div className="container flex items-center justify-between h-16 px-4">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="font-bold text-xl tracking-tight">S_ Events</span>
+        <Link to="/" className="flex items-center gap-1">
+          <span className="font-bold text-2xl tracking-tight">S_</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
@@ -25,18 +25,10 @@ export default function Navbar() {
             return (
               <Link key={item.path} to={item.path}>
                 <Button
-                  variant={isActive ? "default" : "ghost"}
-                  className="relative"
+                  variant="ghost"
+                  className={`relative rounded-full ${isActive ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
                 >
-                  <item.icon className="w-4 h-4 mr-2" />
                   {item.label}
-                  {isActive && (
-                    <motion.div
-                      layoutId="navbar-indicator"
-                      className="absolute inset-0 bg-primary rounded-md -z-10"
-                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
                 </Button>
               </Link>
             );
@@ -44,7 +36,7 @@ export default function Navbar() {
         </nav>
 
         <Link to="/privacy">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="rounded-full">
             <User className="w-5 h-5" />
           </Button>
         </Link>
@@ -59,7 +51,7 @@ export default function Navbar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className={isActive ? 'text-primary' : 'text-muted-foreground'}
+                className={`rounded-full ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
               >
                 <item.icon className="w-5 h-5" />
               </Button>
