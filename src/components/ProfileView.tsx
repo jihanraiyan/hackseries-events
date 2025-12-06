@@ -39,7 +39,7 @@ export default function ProfileView({ profile, onClose }: ProfileViewProps) {
         id: conn.userId,
         x: Math.cos(angle) * radius,
         y: Math.sin(angle) * radius,
-        avatar: conn.connectionDegree === 1 ? conn.avatar : undefined,
+        avatar: conn.avatar,
         name: conn.name,
       });
     });
@@ -101,20 +101,14 @@ export default function ProfileView({ profile, onClose }: ProfileViewProps) {
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.4 + i * 0.05, type: 'spring', stiffness: 200 }}
-                className="absolute w-10 h-10 rounded-full bg-card border border-border shadow-sm flex items-center justify-center overflow-hidden"
+                className="absolute w-10 h-10 rounded-full bg-card border border-border shadow-sm overflow-hidden"
                 style={{
                   left: `calc(50% + ${node.x}px)`,
                   top: `calc(50% + ${node.y}px)`,
                   transform: 'translate(-50%, -50%)',
                 }}
               >
-                {node.avatar ? (
-                  <img src={node.avatar} alt={node.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center">
-                    <span className="text-muted-foreground text-xs">?</span>
-                  </div>
-                )}
+                <img src={node.avatar} alt={node.name} className="w-full h-full object-cover" />
               </motion.div>
             ))}
           </div>
