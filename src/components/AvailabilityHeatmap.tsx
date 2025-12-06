@@ -1,18 +1,29 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Calendar, Clock, Star } from 'lucide-react';
+import { Users, Calendar, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CommunicationProfile } from '@/types/event';
 
 interface AvailabilityHeatmapProps {
   guests: CommunicationProfile[];
-  userAvailability: Record<string, boolean[]>;
+  suggestedTime?: { day: string; slot: string } | null;
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const TIME_SLOTS = [
   '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm'
 ];
+
+// Your pre-set availability (as a college student - evenings and weekends)
+const USER_AVAILABILITY: Record<string, boolean[]> = {
+  Mon: [false, false, false, false, false, false, true, true, true, true, true, true, true],
+  Tue: [false, false, false, false, false, false, true, true, true, true, true, true, true],
+  Wed: [false, false, false, false, false, false, true, true, true, true, true, true, true],
+  Thu: [false, false, false, false, false, false, true, true, true, true, true, true, true],
+  Fri: [false, false, false, false, false, true, true, true, true, true, true, true, true],
+  Sat: [true, true, true, true, true, true, true, true, true, true, true, true, true],
+  Sun: [true, true, true, true, true, true, true, true, true, true, false, false, false],
+};
 
 // Generate mock availability for guests
 function generateGuestAvailability(guestId: string): Record<string, boolean[]> {
@@ -21,9 +32,7 @@ function generateGuestAvailability(guestId: string): Record<string, boolean[]> {
   
   DAYS.forEach((day, dayIndex) => {
     availability[day] = TIME_SLOTS.map((_, slotIndex) => {
-      // Create semi-random but consistent availability
       const hash = (seed * (dayIndex + 1) * (slotIndex + 1)) % 100;
-      // Evenings and weekends more likely
       const bonus = (slotIndex >= 8 ? 20 : 0) + (dayIndex >= 5 ? 15 : 0);
       return hash + bonus > 50;
     });
@@ -32,12 +41,33 @@ function generateGuestAvailability(guestId: string): Record<string, boolean[]> {
   return availability;
 }
 
-export default function AvailabilityHeatmap({ guests, userAvailability }: AvailabilityHeatmapProps) {
+export function getBestTimeSlot(guests: CommunicationProfile[]): { day: string; slot: string; count: number } | null {
+  if (guests.length === 0) return null;
+  
+  let bestSlot: { day: string; slotIndex: number; count: number } | null = null;
+  
+  DAYS.forEach(day => {
+    TIME_SLOTS.forEach((_, slotIndex) => {
+      let count = USER_AVAILABILITY[day]?.[slotIndex] ? 1 : 0;
+      
+      guests.forEach(guest => {
+        const guestAvail = generateGuestAvailability(guest.userId);
+        if (guestAvail[day]?.[slotIndex]) count++;
+      });
+      
+      if (!bestSlot || count > bestSlot.count) {
+        bestSlot = { day, slotIndex, count };
+      }
+    });
+  });
+  
+  return bestSlot ? { day: bestSlot.day, slot: TIME_SLOTS[bestSlot.slotIndex], count: bestSlot.count } : null;
+}
+
+export default function AvailabilityHeatmap({ guests, suggestedTime }: AvailabilityHeatmapProps) {
   const { heatmapData, bestSlots } = useMemo(() => {
-    const totalPeople = guests.length + 1; // +1 for the user
     const data: Record<string, number[]> = {};
     
-    // Initialize with zeros
     DAYS.forEach(day => {
       data[day] = new Array(TIME_SLOTS.length).fill(0);
     });
@@ -45,7 +75,7 @@ export default function AvailabilityHeatmap({ guests, userAvailability }: Availa
     // Add user availability
     DAYS.forEach(day => {
       TIME_SLOTS.forEach((_, slotIndex) => {
-        if (userAvailability[day]?.[slotIndex]) {
+        if (USER_AVAILABILITY[day]?.[slotIndex]) {
           data[day][slotIndex]++;
         }
       });
@@ -76,8 +106,8 @@ export default function AvailabilityHeatmap({ guests, userAvailability }: Availa
       .sort((a, b) => b.count - a.count)
       .slice(0, 3);
     
-    return { heatmapData: data, bestSlots: best, totalPeople };
-  }, [guests, userAvailability]);
+    return { heatmapData: data, bestSlots: best };
+  }, [guests]);
 
   const totalPeople = guests.length + 1;
 
@@ -118,8 +148,21 @@ export default function AvailabilityHeatmap({ guests, userAvailability }: Availa
         </span>
       </div>
 
+      {/* Suggested time highlight */}
+      {suggestedTime && (
+        <div className="mb-4 p-3 bg-green-500/20 rounded-lg border border-green-500/30">
+          <div className="flex items-center gap-2">
+            <Star className="w-4 h-4 text-green-500" />
+            <span className="text-sm font-medium">Auto-selected Time</span>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {suggestedTime.day} at {suggestedTime.slot} - Best for your group
+          </p>
+        </div>
+      )}
+
       {/* Best times */}
-      {bestSlots.length > 0 && (
+      {bestSlots.length > 0 && !suggestedTime && (
         <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
           <div className="flex items-center gap-2 mb-2">
             <Star className="w-4 h-4 text-primary" />
@@ -159,13 +202,16 @@ export default function AvailabilityHeatmap({ guests, userAvailability }: Availa
               const isBestSlot = bestSlots.some(
                 s => s.day === day && s.slotIndex === slotIndex
               );
+              const isSuggestedSlot = suggestedTime?.day === day && 
+                TIME_SLOTS[slotIndex] === suggestedTime?.slot;
               return (
                 <motion.div
                   key={slotIndex}
                   className={cn(
                     "h-5 rounded-sm relative group",
                     getHeatColor(count),
-                    isBestSlot && "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                    isBestSlot && !isSuggestedSlot && "ring-2 ring-primary ring-offset-1 ring-offset-background",
+                    isSuggestedSlot && "ring-2 ring-green-500 ring-offset-1 ring-offset-background"
                   )}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
