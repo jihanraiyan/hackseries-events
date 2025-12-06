@@ -19,7 +19,6 @@ export default function EventDashboard() {
         userId: p.userId,
         name: p.name,
         avatar: p.avatar,
-        interests: p.interests,
         rsvpStatus: Math.random() > 0.3 ? 'accepted' : 'pending' as const,
         individualChemistry: 70 + Math.random() * 25
       })),
