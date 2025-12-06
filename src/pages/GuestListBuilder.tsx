@@ -206,8 +206,6 @@ export default function GuestListBuilder() {
       });
     }
     
-    // Switch to availability tab to show the result
-    setActiveTab('availability');
     setIsCurating(false);
   };
 
