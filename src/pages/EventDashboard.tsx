@@ -293,7 +293,7 @@ export default function EventDashboard() {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container max-w-4xl pt-24 pb-12 px-4">
+      <main className="container max-w-4xl pt-28 sm:pt-24 pb-12 px-4">
         {/* Page header with create button */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold">Events</h1>
