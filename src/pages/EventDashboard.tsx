@@ -1,3 +1,17 @@
+/**
+ * EventDashboard.tsx - Event Management Dashboard
+ * 
+ * Displays all events in two categories:
+ * 1. Hosting - Events the user has created
+ * 2. Invited - Events the user has been invited to
+ * 
+ * Features:
+ * - Tabbed interface for organizing events
+ * - Event cards with cover images and details
+ * - Quick actions (edit, manage guests, RSVP)
+ * - Empty states for each category
+ */
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -15,6 +29,9 @@ import Navbar from '@/components/Navbar';
 import { mockEvents, mockProfiles } from '@/data/mockEventData';
 import { toast } from '@/hooks/use-toast';
 
+/**
+ * Props for the EventCard component
+ */
 interface EventCardProps {
   event: {
     id: string;
@@ -34,7 +51,18 @@ interface EventCardProps {
   onManageGuests?: (id: string) => void;
 }
 
+/**
+ * EventCard Component
+ * 
+ * Displays a single event with:
+ * - Cover image or gradient fallback
+ * - Date badge overlay
+ * - Event details (title, time, location, guest count)
+ * - Context menu for hosted events
+ * - RSVP buttons for pending invites
+ */
 function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCardProps) {
+  // Check if event is in the past for styling
   const isPast = event.date < new Date();
 
   return (
@@ -45,7 +73,7 @@ function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCar
     >
       <Link to={`/events/${event.id}`}>
         <div className={`rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-border transition-all hover:shadow-lg ${isPast ? 'opacity-60' : ''}`}>
-          {/* Cover */}
+          {/* Cover image section */}
           <div className="relative h-32 sm:h-40 overflow-hidden">
             {event.coverImage ? (
               <img 
@@ -55,6 +83,7 @@ function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCar
               />
             ) : (
               <>
+                {/* Gradient fallback when no cover image */}
                 <div className={`absolute inset-0 ${
                   event.coverGradient || 'bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30'
                 }`} />
@@ -64,7 +93,7 @@ function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCar
               </>
             )}
             
-            {/* Date Badge */}
+            {/* Date badge - positioned top-left */}
             <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center min-w-[52px]">
               <div className="text-xs font-medium text-muted-foreground uppercase">
                 {event.date.toLocaleDateString('en-US', { month: 'short' })}
@@ -74,7 +103,7 @@ function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCar
               </div>
             </div>
 
-            {/* RSVP Status for invited events */}
+            {/* RSVP status badge for invited events */}
             {!isHosted && event.rsvpStatus && (
               <div className="absolute top-3 right-3">
                 <Badge 
@@ -86,7 +115,7 @@ function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCar
               </div>
             )}
 
-            {/* Menu for hosted events */}
+            {/* Actions dropdown menu for hosted events */}
             {isHosted && (
               <div className="absolute top-3 right-3">
                 <DropdownMenu>
@@ -118,14 +147,16 @@ function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCar
             )}
           </div>
 
-          {/* Content */}
+          {/* Event content/details section */}
           <div className="p-4">
             <h3 className="font-semibold text-lg mb-1 truncate">{event.title}</h3>
             
+            {/* Host name for invited events */}
             {!isHosted && event.host && (
               <p className="text-sm text-muted-foreground mb-2">Hosted by {event.host}</p>
             )}
             
+            {/* Event metadata - time, location, guest count */}
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" />
@@ -143,7 +174,7 @@ function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCar
               </div>
             </div>
 
-            {/* RSVP Buttons for pending invites */}
+            {/* Quick RSVP buttons for pending invitations */}
             {!isHosted && event.rsvpStatus === 'pending' && (
               <div className="flex gap-2 mt-4">
                 <Button 
@@ -177,15 +208,23 @@ function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCar
   );
 }
 
+/**
+ * Main EventDashboard Component
+ * 
+ * The main dashboard page showing all user events organized by:
+ * - "Hosting" tab: Events created by the user
+ * - "Invited" tab: Events the user has been invited to
+ */
 export default function EventDashboard() {
   const navigate = useNavigate();
 
-  // Cover images for hosted events
+  // Sample cover images for hosted events
   const coverImages = [
     'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop',
   ];
 
+  // Transform mock events into hosted events with additional data
   const hostedEvents = mockEvents.map((event, i) => ({
     id: event.id,
     title: event.title,
@@ -197,15 +236,17 @@ export default function EventDashboard() {
     coverImage: coverImages[i % coverImages.length],
   }));
 
+  // Navigate to edit event page
   const handleEditEvent = (eventId: string) => {
     navigate(`/events/${eventId}/edit`);
   };
 
+  // Navigate to guest management page with event context
   const handleManageGuests = (eventId: string) => {
     navigate(`/guest-builder?eventId=${eventId}`);
   };
 
-  // Events you're invited to
+  // Sample events the user has been invited to
   const invitedEvents = [
     {
       id: 'inv-1',
@@ -245,6 +286,7 @@ export default function EventDashboard() {
     },
   ];
 
+  // Count pending invitations for badge
   const pendingCount = invitedEvents.filter(e => e.rsvpStatus === 'pending').length;
 
   return (
@@ -252,6 +294,7 @@ export default function EventDashboard() {
       <Navbar />
       
       <main className="container max-w-4xl pt-24 pb-12 px-4">
+        {/* Page header with create button */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold">Events</h1>
           <Link to="/create-event">
@@ -262,6 +305,7 @@ export default function EventDashboard() {
           </Link>
         </div>
 
+        {/* Tabbed interface for hosting/invited events */}
         <Tabs defaultValue="hosting" className="w-full">
           <TabsList className="w-full mb-6">
             <TabsTrigger value="hosting" className="flex-1">
@@ -282,6 +326,7 @@ export default function EventDashboard() {
             </TabsTrigger>
           </TabsList>
 
+          {/* Hosted events grid */}
           <TabsContent value="hosting">
             {hostedEvents.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2">
@@ -301,6 +346,7 @@ export default function EventDashboard() {
             )}
           </TabsContent>
 
+          {/* Invited events grid */}
           <TabsContent value="invited">
             {invitedEvents.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2">
@@ -325,6 +371,12 @@ export default function EventDashboard() {
   );
 }
 
+/**
+ * EmptyState Component
+ * 
+ * Displayed when there are no events in a category
+ * Shows appropriate message and CTA based on type
+ */
 function EmptyState({ type }: { type: 'hosting' | 'invited' }) {
   return (
     <motion.div
@@ -332,9 +384,12 @@ function EmptyState({ type }: { type: 'hosting' | 'invited' }) {
       animate={{ opacity: 1 }}
       className="text-center py-16"
     >
+      {/* Decorative icon */}
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/50 flex items-center justify-center">
         <Calendar className="w-10 h-10 text-muted-foreground/50" />
       </div>
+      
+      {/* Empty state messaging */}
       <h2 className="text-lg font-semibold mb-2">
         {type === 'hosting' ? 'No Events Yet' : 'No Invites Yet'}
       </h2>
@@ -344,6 +399,8 @@ function EmptyState({ type }: { type: 'hosting' | 'invited' }) {
           : "When you're invited to events, they'll show up here."
         }
       </p>
+      
+      {/* CTA for hosting empty state */}
       {type === 'hosting' && (
         <Link to="/create-event">
           <Button>
