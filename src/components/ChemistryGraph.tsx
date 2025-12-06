@@ -67,18 +67,18 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
 
   const nodeCanvasObject = useCallback((node: NodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const graphNode = node as GraphNode;
-    const size = 12;
+    const size = 8;
     const isHovered = hoveredNode === graphNode.id;
-    const scale = isHovered ? 1.3 : 1;
+    const scale = isHovered ? 1.4 : 1;
     const x = node.x ?? 0;
     const y = node.y ?? 0;
 
     // Draw glow for high chemistry
     if (graphNode.chemistry > 70) {
       ctx.beginPath();
-      ctx.arc(x, y, size * scale + 8, 0, 2 * Math.PI);
-      const gradient = ctx.createRadialGradient(x, y, size * scale, x, y, size * scale + 15);
-      gradient.addColorStop(0, 'rgba(0, 180, 130, 0.5)');
+      ctx.arc(x, y, size * scale + 5, 0, 2 * Math.PI);
+      const gradient = ctx.createRadialGradient(x, y, size * scale, x, y, size * scale + 10);
+      gradient.addColorStop(0, 'rgba(0, 180, 130, 0.4)');
       gradient.addColorStop(1, 'rgba(0, 180, 130, 0)');
       ctx.fillStyle = gradient;
       ctx.fill();
@@ -86,7 +86,7 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
 
     // Draw border
     ctx.beginPath();
-    ctx.arc(x, y, size * scale + 2, 0, 2 * Math.PI);
+    ctx.arc(x, y, size * scale + 1.5, 0, 2 * Math.PI);
     ctx.fillStyle = graphNode.chemistry > 70 ? '#00D9A0' : graphNode.chemistry > 50 ? '#FFB84D' : '#FF4D4D';
     ctx.fill();
 
@@ -102,20 +102,20 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
       ctx.fillStyle = '#e5e5e5';
       ctx.fill();
       ctx.fillStyle = '#333';
-      ctx.font = `${14 * scale}px Space Grotesk`;
+      ctx.font = `${10 * scale}px Space Grotesk`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(graphNode.name.charAt(0), x, y);
     }
     ctx.restore();
 
-    // Draw name label
+    // Draw name label - smaller font
     if (globalScale > 0.7 || isHovered) {
-      ctx.font = `${isHovered ? 12 : 10}px Space Grotesk`;
+      ctx.font = `${isHovered ? 9 : 7}px Space Grotesk`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = isHovered ? '#000' : 'rgba(0,0,0,0.7)';
-      ctx.fillText(graphNode.name.split(' ')[0], x, y + size * scale + 5);
+      ctx.fillStyle = isHovered ? '#000' : 'rgba(0,0,0,0.6)';
+      ctx.fillText(graphNode.name.split(' ')[0], x, y + size * scale + 3);
     }
   }, [hoveredNode]);
 
