@@ -8,6 +8,7 @@ import CreateEvent from "./pages/CreateEvent";
 import GuestListBuilder from "./pages/GuestListBuilder";
 import EventDashboard from "./pages/EventDashboard";
 import EventDetail from "./pages/EventDetail";
+import EditEvent from "./pages/EditEvent";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/guest-builder" element={<GuestListBuilder />} />
             <Route path="/events" element={<EventDashboard />} />
             <Route path="/events/:eventId" element={<EventDetail />} />
+            <Route path="/events/:eventId/edit" element={<EditEvent />} />
             <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

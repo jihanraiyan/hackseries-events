@@ -1,8 +1,8 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Calendar, Clock, MapPin, Users, ArrowLeft, Share2, 
-  Check, X, MessageSquare, Copy, MoreHorizontal 
+  Check, X, MessageSquare, Copy, MoreHorizontal, Pencil 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +31,7 @@ const eventData: Record<string, {
   rsvpStatus?: 'going' | 'maybe' | 'pending';
   guests: Array<{ id: string; name: string; avatar: string; status: 'going' | 'maybe' | 'invited' }>;
   maxAttendees: number;
+  coverImage?: string;
 }> = {
   'event-1': {
     id: 'event-1',
@@ -48,6 +49,7 @@ const eventData: Record<string, {
       status: i < 5 ? 'going' : i < 7 ? 'maybe' : 'invited'
     })),
     maxAttendees: 10,
+    coverImage: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop',
   },
   'event-2': {
     id: 'event-2',
@@ -65,6 +67,7 @@ const eventData: Record<string, {
       status: i < 8 ? 'going' : i < 10 ? 'maybe' : 'invited'
     })),
     maxAttendees: 25,
+    coverImage: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop',
   },
   'inv-1': {
     id: 'inv-1',
@@ -83,6 +86,7 @@ const eventData: Record<string, {
       status: i < 10 ? 'going' : 'maybe'
     })),
     maxAttendees: 40,
+    coverImage: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&auto=format&fit=crop',
   },
   'inv-2': {
     id: 'inv-2',
@@ -101,6 +105,7 @@ const eventData: Record<string, {
       status: 'going'
     })),
     maxAttendees: 15,
+    coverImage: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=800&auto=format&fit=crop',
   },
   'inv-3': {
     id: 'inv-3',
@@ -119,6 +124,7 @@ const eventData: Record<string, {
       status: i < 15 ? 'going' : 'maybe'
     })),
     maxAttendees: 50,
+    coverImage: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&auto=format&fit=crop',
   },
 };
 
@@ -177,7 +183,10 @@ export default function EventDetail() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Edit Event</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/events/${eventId}/edit`)}>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit Event
+                  </DropdownMenuItem>
                   <DropdownMenuItem>Manage Guests</DropdownMenuItem>
                   <DropdownMenuItem>Send Reminders</DropdownMenuItem>
                   <DropdownMenuItem className="text-destructive">Cancel Event</DropdownMenuItem>
@@ -193,11 +202,19 @@ export default function EventDetail() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="relative h-48 sm:h-64 bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30"
+          className="relative h-48 sm:h-64 overflow-hidden"
         >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Calendar className="w-16 h-16 text-primary/30" />
-          </div>
+          {event.coverImage ? (
+            <img 
+              src={event.coverImage} 
+              alt={event.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30 flex items-center justify-center">
+              <Calendar className="w-16 h-16 text-primary/30" />
+            </div>
+          )}
         </motion.div>
 
         {/* Content */}

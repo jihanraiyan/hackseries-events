@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Users, Globe, Lock, ArrowRight, Sparkles } from 'lucide-react';
+import { Calendar, Clock, Users, Globe, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { CoverImagePicker } from '@/components/CoverImagePicker';
 import Navbar from '@/components/Navbar';
 
 export default function CreateEvent() {
@@ -24,7 +25,8 @@ export default function CreateEvent() {
     date: getDefaultDate(),
     time: '19:00',
     isPrivate: true,
-    maxAttendees: 10
+    maxAttendees: 10,
+    coverImage: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -52,6 +54,19 @@ export default function CreateEvent() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Cover Image */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Label className="text-sm text-muted-foreground mb-2 block">Cover Image (optional)</Label>
+              <CoverImagePicker
+                value={formData.coverImage}
+                onChange={(value) => setFormData(f => ({ ...f, coverImage: value }))}
+                className="h-40 sm:h-52"
+              />
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
