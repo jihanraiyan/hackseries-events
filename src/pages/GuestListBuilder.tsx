@@ -172,19 +172,21 @@ export default function GuestListBuilder() {
             </div>
 
             {/* Guest List */}
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-              <AnimatePresence mode="popLayout">
-                {filteredProfiles.map((profile, index) => (
-                  <GuestCard
-                    key={profile.userId}
-                    profile={profile}
-                    isSelected={selectedGuests.some(g => g.userId === profile.userId)}
-                    onToggle={() => toggleGuest(profile)}
-                    onViewProfile={() => setViewingProfile(profile)}
-                    index={index}
-                  />
-                ))}
-              </AnimatePresence>
+            <div className="flex-1 overflow-y-auto pr-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <AnimatePresence mode="popLayout">
+                  {filteredProfiles.map((profile, index) => (
+                    <GuestCard
+                      key={profile.userId}
+                      profile={profile}
+                      isSelected={selectedGuests.some(g => g.userId === profile.userId)}
+                      onToggle={() => toggleGuest(profile)}
+                      onViewProfile={() => setViewingProfile(profile)}
+                      index={index}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
             </div>
           </motion.div>
 
