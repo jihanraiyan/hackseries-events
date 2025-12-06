@@ -18,10 +18,14 @@ export default function Index() {
           className="text-center max-w-3xl mx-auto"
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight">
-            Get connected with{' '}
-            <span className="text-primary">anyone</span>{' '}
-            instantly.
+            Curate the perfect{' '}
+            <span className="text-primary">guest list</span>{' '}
+            with AI.
           </h1>
+          
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Match guests by age, background, and connections to create events where everyone clicks.
+          </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
             <Link to="/create-event">
