@@ -166,45 +166,73 @@ export default function GuestListBuilder() {
     // Simulate AI thinking
     await new Promise(resolve => setTimeout(resolve, 2500));
     
-    // Auto-select best guests if none selected
-    if (selectedGuests.length < 3) {
-      // Pick 5-7 random guests with high chemistry potential
-      const shuffled = [...mockProfiles].sort(() => Math.random() - 0.5);
-      const autoSelected = shuffled.slice(0, Math.floor(Math.random() * 3) + 5);
-      setSelectedGuests(autoSelected);
-      
-      // Optimize the auto-selected list
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const { optimizedGuests } = optimizeGuestList(autoSelected);
-      setSelectedGuests(optimizedGuests);
-      
-      // Get best time for the curated group
-      const bestTime = getBestTimeSlot(optimizedGuests);
-      if (bestTime) {
-        setSuggestedTime({ day: bestTime.day, slot: bestTime.slot });
-      }
-      
-      toast({
-        title: "Event Curated!",
-        description: `Selected ${optimizedGuests.length} guests and found the best time for everyone.`,
-      });
-    } else {
-      // Optimize existing list and find best time
-      const { optimizedGuests, removed } = optimizeGuestList(selectedGuests);
-      setSelectedGuests(optimizedGuests);
-      
-      const bestTime = getBestTimeSlot(optimizedGuests);
-      if (bestTime) {
-        setSuggestedTime({ day: bestTime.day, slot: bestTime.slot });
-      }
-      
-      toast({
-        title: "Event Curated!",
-        description: removed.length > 0 
-          ? `Optimized guest list and scheduled for ${bestTime?.day} ${bestTime?.slot}.`
-          : `Found the best time: ${bestTime?.day} at ${bestTime?.slot}.`,
-      });
+    // Greedy algorithm to maximize chemistry score
+    const targetSize = Math.min(8, Math.max(5, mockProfiles.length));
+    let bestGroup: CommunicationProfile[] = [];
+    let bestScore = 0;
+    
+    // Start with profiles that have high individual chemistry (1st/2nd degree, already know)
+    const rankedProfiles = [...mockProfiles].sort((a, b) => {
+      // Prioritize 1st degree connections
+      const degreeScoreA = a.connectionDegree === 1 ? 30 : a.connectionDegree === 2 ? 15 : 0;
+      const degreeScoreB = b.connectionDegree === 1 ? 30 : b.connectionDegree === 2 ? 15 : 0;
+      // Bonus for already knowing
+      const knowScoreA = a.alreadyKnow ? 20 : 0;
+      const knowScoreB = b.alreadyKnow ? 20 : 0;
+      return (degreeScoreB + knowScoreB) - (degreeScoreA + knowScoreA);
+    });
+    
+    // Greedy selection: add guests one by one, picking the one that maximizes score
+    const currentGroup: CommunicationProfile[] = [];
+    const available = [...rankedProfiles];
+    
+    // Start with the best-ranked profile
+    if (available.length > 0) {
+      currentGroup.push(available.shift()!);
     }
+    
+    // Greedily add guests that maximize chemistry
+    while (currentGroup.length < targetSize && available.length > 0) {
+      let bestCandidate: CommunicationProfile | null = null;
+      let bestCandidateScore = -1;
+      let bestCandidateIndex = -1;
+      
+      for (let i = 0; i < available.length; i++) {
+        const candidate = available[i];
+        const testGroup = [...currentGroup, candidate];
+        const analysis = calculateGroupChemistry(testGroup);
+        
+        if (analysis.groupScore > bestCandidateScore) {
+          bestCandidateScore = analysis.groupScore;
+          bestCandidate = candidate;
+          bestCandidateIndex = i;
+        }
+      }
+      
+      if (bestCandidate && bestCandidateIndex >= 0) {
+        currentGroup.push(bestCandidate);
+        available.splice(bestCandidateIndex, 1);
+      } else {
+        break;
+      }
+    }
+    
+    const finalAnalysis = calculateGroupChemistry(currentGroup);
+    bestGroup = currentGroup;
+    bestScore = finalAnalysis.groupScore;
+    
+    setSelectedGuests(bestGroup);
+    
+    // Get best time for the curated group
+    const bestTime = getBestTimeSlot(bestGroup);
+    if (bestTime) {
+      setSuggestedTime({ day: bestTime.day, slot: bestTime.slot });
+    }
+    
+    toast({
+      title: "Event Curated!",
+      description: `Selected ${bestGroup.length} guests with ${bestScore}% chemistry score.`,
+    });
     
     setIsCurating(false);
   };
