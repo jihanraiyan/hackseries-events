@@ -259,7 +259,7 @@ export default function GuestListBuilder() {
             animate={{ opacity: 1, x: 0 }}
             className="flex flex-col"
           >
-            <div className="glass rounded-xl p-6 flex-1 flex flex-col">
+            <div className="rounded-2xl border bg-card p-6 flex-1 flex flex-col">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-2 mb-4">
                   <TabsTrigger value="chemistry">Chemistry</TabsTrigger>
@@ -276,7 +276,7 @@ export default function GuestListBuilder() {
                   </div>
 
                   {/* Graph */}
-                  <div className="flex-1 min-h-[250px] bg-background/30 rounded-lg mb-4">
+                  <div className="flex-1 min-h-[250px] bg-secondary/50 rounded-xl mb-4">
                     <ChemistryGraph
                       guests={selectedGuests}
                       analysis={analysis}

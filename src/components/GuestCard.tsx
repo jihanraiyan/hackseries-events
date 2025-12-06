@@ -35,8 +35,8 @@ export default function GuestCard({ profile, isSelected, onToggle, onViewProfile
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.03 }}
-      className={`glass rounded-xl p-3 transition-all duration-300 cursor-pointer relative ${
-        isSelected ? 'ring-2 ring-primary bg-primary/10' : 'hover:bg-card/80'
+      className={`rounded-2xl border bg-card p-3 transition-all duration-200 cursor-pointer relative ${
+        isSelected ? 'ring-2 ring-foreground bg-secondary' : 'hover:bg-secondary/50'
       }`}
       onClick={onViewProfile}
     >
@@ -48,14 +48,14 @@ export default function GuestCard({ profile, isSelected, onToggle, onViewProfile
             className="w-14 h-14 rounded-full object-cover"
           />
           {profile.alreadyKnow && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-              <Users className="w-2.5 h-2.5 text-primary-foreground" />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-foreground rounded-full flex items-center justify-center">
+              <Users className="w-2.5 h-2.5 text-background" />
             </div>
           )}
         </div>
         
         <div className="w-full">
-          <h3 className="font-semibold text-sm truncate">{profile.name}</h3>
+          <h3 className="font-medium text-sm truncate">{profile.name}</h3>
           <p className="text-xs text-muted-foreground truncate">{profile.role}</p>
         </div>
         
@@ -70,7 +70,7 @@ export default function GuestCard({ profile, isSelected, onToggle, onViewProfile
         
         <Button
           size="sm"
-          variant={isSelected ? "destructive" : "default"}
+          variant={isSelected ? "outline" : "default"}
           onClick={(e) => {
             e.stopPropagation();
             onToggle();

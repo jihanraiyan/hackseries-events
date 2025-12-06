@@ -123,7 +123,7 @@ export default function AvailabilityHeatmap({ guests, suggestedTime }: Availabil
 
   if (guests.length === 0) {
     return (
-      <div className="glass rounded-lg p-6 text-center">
+      <div className="rounded-xl border bg-card p-6 text-center">
         <Calendar className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
         <p className="text-sm text-muted-foreground">
           Select guests to see group availability
@@ -136,11 +136,11 @@ export default function AvailabilityHeatmap({ guests, suggestedTime }: Availabil
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass rounded-lg p-4"
+      className="rounded-xl border bg-card p-4"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-primary" />
+          <Users className="w-4 h-4 text-foreground" />
           <h3 className="font-semibold text-sm">Group Availability</h3>
         </div>
         <span className="text-xs text-muted-foreground">
@@ -150,9 +150,9 @@ export default function AvailabilityHeatmap({ guests, suggestedTime }: Availabil
 
       {/* Suggested time highlight */}
       {suggestedTime && (
-        <div className="mb-4 p-3 bg-green-500/20 rounded-lg border border-green-500/30">
+        <div className="mb-4 p-3 bg-secondary rounded-xl border border-border">
           <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-green-500" />
+            <Star className="w-4 h-4 text-foreground" />
             <span className="text-sm font-medium">Auto-selected Time</span>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
@@ -163,9 +163,9 @@ export default function AvailabilityHeatmap({ guests, suggestedTime }: Availabil
 
       {/* Best times */}
       {bestSlots.length > 0 && !suggestedTime && (
-        <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+        <div className="mb-4 p-3 bg-secondary rounded-xl border border-border">
           <div className="flex items-center gap-2 mb-2">
-            <Star className="w-4 h-4 text-primary" />
+            <Star className="w-4 h-4 text-foreground" />
             <span className="text-xs font-medium">Best Times to Meet</span>
           </div>
           <div className="flex flex-wrap gap-2">

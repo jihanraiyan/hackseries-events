@@ -39,12 +39,6 @@ export default function ChemistryScore({ score, size = 'md', showLabel = true }:
     return 'text-chemistry-low';
   };
 
-  const getGlowClass = (s: number) => {
-    if (s >= 85) return 'glow-chemistry-high';
-    if (s >= 70) return 'glow-chemistry-medium';
-    return 'glow-chemistry-low';
-  };
-
   const sizeClasses = {
     sm: 'text-2xl',
     md: 'text-5xl',
@@ -59,7 +53,7 @@ export default function ChemistryScore({ score, size = 'md', showLabel = true }:
         key={score}
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className={`relative inline-block ${getGlowClass(score)} rounded-2xl p-4`}
+        className="relative inline-block rounded-2xl p-4 bg-secondary/50"
       >
         <span className={`font-mono font-bold ${sizeClasses[size]} ${getScoreColor(score)}`}>
           {displayScore}
