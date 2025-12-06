@@ -24,7 +24,7 @@ interface EventCardProps {
     location?: string;
     guestCount: number;
     maxAttendees: number;
-    coverImage?: string;
+    coverGradient?: string;
     host?: string;
     rsvpStatus?: 'going' | 'maybe' | 'pending';
   };
@@ -43,19 +43,14 @@ function EventCard({ event, isHosted = false }: EventCardProps) {
     >
       <Link to={`/events/${event.id}`}>
         <div className={`rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-border transition-all hover:shadow-lg ${isPast ? 'opacity-60' : ''}`}>
-          {/* Cover Image */}
-          <div className="relative h-32 sm:h-40 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
-            {event.coverImage ? (
-              <img 
-                src={event.coverImage} 
-                alt={event.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Calendar className="w-12 h-12 text-muted-foreground/30" />
-              </div>
-            )}
+          {/* Cover */}
+          <div className="relative h-32 sm:h-40 overflow-hidden">
+            <div className={`absolute inset-0 ${
+              event.coverGradient || 'bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30'
+            }`} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Calendar className="w-12 h-12 text-foreground/10" />
+            </div>
             
             {/* Date Badge */}
             <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center min-w-[52px]">
@@ -159,7 +154,12 @@ function EventCard({ event, isHosted = false }: EventCardProps) {
 }
 
 export default function EventDashboard() {
-  // Your hosted events
+  // Your hosted events with unique gradients
+  const gradients = [
+    'bg-gradient-to-br from-primary/40 via-primary/20 to-secondary/30',
+    'bg-gradient-to-br from-secondary/40 via-accent/20 to-primary/30',
+  ];
+
   const hostedEvents = mockEvents.map((event, i) => ({
     id: event.id,
     title: event.title,
@@ -168,7 +168,7 @@ export default function EventDashboard() {
     location: 'New York, NY',
     guestCount: 5 + i * 2,
     maxAttendees: event.maxAttendees,
-    coverImage: `https://images.unsplash.com/photo-${1540575467063 + i * 1000}-210b6450ea49?w=600&h=400&fit=crop`,
+    coverGradient: gradients[i % gradients.length],
   }));
 
   // Events you're invited to
@@ -183,7 +183,7 @@ export default function EventDashboard() {
       maxAttendees: 40,
       host: 'Sarah Chen',
       rsvpStatus: 'pending' as const,
-      coverImage: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop',
+      coverGradient: 'bg-gradient-to-br from-orange-500/30 via-pink-500/20 to-purple-500/30',
     },
     {
       id: 'inv-2',
@@ -195,7 +195,7 @@ export default function EventDashboard() {
       maxAttendees: 15,
       host: 'Alex Rivera',
       rsvpStatus: 'going' as const,
-      coverImage: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+      coverGradient: 'bg-gradient-to-br from-blue-500/30 via-cyan-500/20 to-teal-500/30',
     },
     {
       id: 'inv-3',
@@ -207,7 +207,7 @@ export default function EventDashboard() {
       maxAttendees: 50,
       host: 'Maya Johnson',
       rsvpStatus: 'maybe' as const,
-      coverImage: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=400&fit=crop',
+      coverGradient: 'bg-gradient-to-br from-violet-500/30 via-fuchsia-500/20 to-pink-500/30',
     },
   ];
 
