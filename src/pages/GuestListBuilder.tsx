@@ -59,6 +59,31 @@ export default function GuestListBuilder() {
   );
   const [suggestedTime, setSuggestedTime] = useState<{ day: string; slot: string } | null>(null);
   const [activeTab, setActiveTab] = useState('chemistry');
+  
+  // Event date/time state - load from sessionStorage
+  const [eventDateTime, setEventDateTime] = useState<{ date: string; time: string }>(() => {
+    const savedEvent = sessionStorage.getItem('newEvent');
+    if (savedEvent) {
+      const parsed = JSON.parse(savedEvent);
+      return { date: parsed.date || '', time: parsed.time || '19:00' };
+    }
+    // Default to a week from now
+    const defaultDate = new Date();
+    defaultDate.setDate(defaultDate.getDate() + 7);
+    return { date: defaultDate.toISOString().split('T')[0], time: '19:00' };
+  });
+
+  // Update sessionStorage when date/time changes
+  const handleEventDateTimeChange = (newDateTime: { date: string; time: string }) => {
+    setEventDateTime(newDateTime);
+    const savedEvent = sessionStorage.getItem('newEvent');
+    if (savedEvent) {
+      const parsed = JSON.parse(savedEvent);
+      sessionStorage.setItem('newEvent', JSON.stringify({ ...parsed, ...newDateTime }));
+    } else {
+      sessionStorage.setItem('newEvent', JSON.stringify(newDateTime));
+    }
+  };
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -345,6 +370,8 @@ export default function GuestListBuilder() {
                   <AvailabilityHeatmap 
                     guests={selectedGuests} 
                     suggestedTime={suggestedTime}
+                    eventDateTime={eventDateTime}
+                    onEventDateTimeChange={handleEventDateTimeChange}
                   />
                 </TabsContent>
               </Tabs>
