@@ -113,6 +113,22 @@ mockProfiles[2] = {
   bio: "I'm Alex, 21, building impactful stuff while studying CS at NYU. Let's change the world!"
 };
 
+// Current user profile for display on privacy/profile pages
+export const currentUserProfile: CommunicationProfile = {
+  userId: 'current-user',
+  name: 'You',
+  avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+  age: 27,
+  gender: 'male',
+  school: 'Stanford University',
+  role: 'Founder & CEO',
+  company: 'Your Startup',
+  bio: "Building the next generation of social experiences. Passionate about connecting people.",
+  connectionDegree: 1,
+  alreadyKnow: false,
+  linkedinUrl: 'https://linkedin.com/in/you'
+};
+
 export const mockEvents: Event[] = [
   {
     id: 'event-1',
