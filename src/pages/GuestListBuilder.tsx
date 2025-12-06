@@ -315,12 +315,12 @@ export default function GuestListBuilder() {
                   </div>
 
                   {/* Graph - expanded to fill space */}
-                  <div className="flex-1 min-h-[350px] bg-secondary/50 rounded-xl mb-3">
+                  <div className="flex-1 min-h-[300px]">
                     <ChemistryGraph
                       guests={selectedGuests}
                       analysis={analysis}
                       width={graphSize.width}
-                      height={Math.max(graphSize.height, 350)}
+                      height={Math.max(graphSize.height - 100, 300)}
                     />
                   </div>
 
