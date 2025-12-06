@@ -11,11 +11,18 @@ import Navbar from '@/components/Navbar';
 
 export default function CreateEvent() {
   const navigate = useNavigate();
+  // Pre-fill with example event for demo
+  const getDefaultDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date.toISOString().split('T')[0];
+  };
+
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: '',
-    time: '',
+    title: 'Founder Dinner - Series A Celebration',
+    description: 'An intimate dinner for founders who recently closed their Series A. Share war stories, celebrate wins, and connect with fellow entrepreneurs in a relaxed setting.',
+    date: getDefaultDate(),
+    time: '19:00',
     isPrivate: true,
     maxAttendees: 10
   });
