@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Sparkles, Send, Wand2, Filter, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -33,6 +35,9 @@ export default function GuestListBuilder() {
   const [isSending, setIsSending] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [viewingProfile, setViewingProfile] = useState<CommunicationProfile | null>(null);
+  const [inviteMessage, setInviteMessage] = useState(
+    `Hey [Name]! You're invited to an exclusive event with fellow [School] alumni. Based on your profile, we think you'd be a great fit!`
+  );
 
   const filteredProfiles = useMemo(() => {
     return mockProfiles.filter(profile => {
@@ -291,12 +296,17 @@ export default function GuestListBuilder() {
               )}
             </div>
 
-            <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
-              <p className="text-sm font-medium mb-2">Sample Message Preview:</p>
-              <p className="text-sm text-muted-foreground italic">
-                "Hey {selectedGuests[0]?.name.split(' ')[0] || 'there'}! You're invited to an exclusive event with fellow{' '}
-                {selectedGuests[0]?.school || 'university'} alumni. Based on your profile, we think you'd be a great fit!"
-              </p>
+            <div className="mt-4 space-y-2">
+              <Label htmlFor="invite-message" className="text-sm font-medium">
+                Your Message <span className="text-muted-foreground font-normal">(use [Name] and [School] as placeholders)</span>
+              </Label>
+              <Textarea
+                id="invite-message"
+                value={inviteMessage}
+                onChange={(e) => setInviteMessage(e.target.value)}
+                placeholder="Write your invite message..."
+                className="min-h-[100px] resize-none"
+              />
             </div>
           </div>
 
