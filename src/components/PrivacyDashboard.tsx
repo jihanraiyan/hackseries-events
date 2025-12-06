@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Eye, Calendar, Activity, Linkedin } from 'lucide-react';
+import { Shield, Eye, Calendar, Linkedin } from 'lucide-react';
 import { currentUserProfile, mockProfiles } from '@/data/mockEventData';
 import userAvatar from '@/assets/user-avatar.jpg';
 
@@ -16,7 +16,6 @@ interface ConnectionNode {
 
 export default function PrivacyDashboard() {
   const [settings, setSettings] = useState({
-    enableAnalysis: true,
     shareAvailability: true,
     appearInRecommendations: true
   });
@@ -56,26 +55,6 @@ export default function PrivacyDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Activity className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Enable communication analysis</p>
-                <p className="text-sm text-muted-foreground">Analyze behavioral patterns to predict chemistry</p>
-              </div>
-            </div>
-            <Switch
-              checked={settings.enableAnalysis}
-              onCheckedChange={(checked) => setSettings(s => ({ ...s, enableAnalysis: checked }))}
-            />
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
