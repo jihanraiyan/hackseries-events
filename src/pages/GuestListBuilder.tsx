@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Sparkles, Send, Wand2, Filter, ChevronRight, Calendar } from 'lucide-react';
+import { Search, Sparkles, Send, Wand2, Filter, ChevronRight, Calendar, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,8 +22,7 @@ import ChemistryScore from '@/components/ChemistryScore';
 import GuestCard from '@/components/GuestCard';
 import InsightsPanel from '@/components/InsightsPanel';
 import ProfileView from '@/components/ProfileView';
-import AvailabilityPicker from '@/components/AvailabilityPicker';
-import AvailabilityHeatmap from '@/components/AvailabilityHeatmap';
+import AvailabilityHeatmap, { getBestTimeSlot } from '@/components/AvailabilityHeatmap';
 import { mockProfiles } from '@/data/mockEventData';
 import { CommunicationProfile } from '@/types/event';
 import { calculateGroupChemistry, optimizeGuestList } from '@/services/chemistryCalculator';
@@ -34,6 +33,7 @@ export default function GuestListBuilder() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGuests, setSelectedGuests] = useState<CommunicationProfile[]>([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isCurating, setIsCurating] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export default function GuestListBuilder() {
   const [inviteMessage, setInviteMessage] = useState(
     `Hey [Name]! You're invited to an exclusive event with fellow [School] alumni. Based on your profile, we think you'd be a great fit!`
   );
-  const [userAvailability, setUserAvailability] = useState<Record<string, boolean[]>>({});
+  const [suggestedTime, setSuggestedTime] = useState<{ day: string; slot: string } | null>(null);
   const [activeTab, setActiveTab] = useState('chemistry');
 
   const filteredProfiles = useMemo(() => {
@@ -76,12 +76,13 @@ export default function GuestListBuilder() {
       }
       return [...prev, profile];
     });
+    // Clear suggested time when guests change
+    setSuggestedTime(null);
   };
 
   const handleOptimize = async () => {
     setIsOptimizing(true);
     
-    // Simulate AI thinking
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     const { optimizedGuests, removed } = optimizeGuestList(selectedGuests);
@@ -89,7 +90,7 @@ export default function GuestListBuilder() {
     if (removed.length > 0) {
       setSelectedGuests(optimizedGuests);
       toast({
-        title: "Guest List Optimized! 🎉",
+        title: "Guest List Optimized!",
         description: `Removed ${removed.map(r => r.name).join(' & ')} to improve group chemistry.`,
       });
     } else {
@@ -102,6 +103,57 @@ export default function GuestListBuilder() {
     setIsOptimizing(false);
   };
 
+  const handleAutoCurate = async () => {
+    setIsCurating(true);
+    
+    // Simulate AI thinking
+    await new Promise(resolve => setTimeout(resolve, 2500));
+    
+    // Auto-select best guests if none selected
+    if (selectedGuests.length < 3) {
+      // Pick 5-7 random guests with high chemistry potential
+      const shuffled = [...mockProfiles].sort(() => Math.random() - 0.5);
+      const autoSelected = shuffled.slice(0, Math.floor(Math.random() * 3) + 5);
+      setSelectedGuests(autoSelected);
+      
+      // Optimize the auto-selected list
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { optimizedGuests } = optimizeGuestList(autoSelected);
+      setSelectedGuests(optimizedGuests);
+      
+      // Get best time for the curated group
+      const bestTime = getBestTimeSlot(optimizedGuests);
+      if (bestTime) {
+        setSuggestedTime({ day: bestTime.day, slot: bestTime.slot });
+      }
+      
+      toast({
+        title: "Event Curated!",
+        description: `Selected ${optimizedGuests.length} guests and found the best time for everyone.`,
+      });
+    } else {
+      // Optimize existing list and find best time
+      const { optimizedGuests, removed } = optimizeGuestList(selectedGuests);
+      setSelectedGuests(optimizedGuests);
+      
+      const bestTime = getBestTimeSlot(optimizedGuests);
+      if (bestTime) {
+        setSuggestedTime({ day: bestTime.day, slot: bestTime.slot });
+      }
+      
+      toast({
+        title: "Event Curated!",
+        description: removed.length > 0 
+          ? `Optimized guest list and scheduled for ${bestTime?.day} ${bestTime?.slot}.`
+          : `Found the best time: ${bestTime?.day} at ${bestTime?.slot}.`,
+      });
+    }
+    
+    // Switch to availability tab to show the result
+    setActiveTab('availability');
+    setIsCurating(false);
+  };
+
   const handleSendInvites = async () => {
     setIsSending(true);
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -109,7 +161,7 @@ export default function GuestListBuilder() {
     setShowInviteModal(false);
     
     toast({
-      title: "Invitations Sent! 🚀",
+      title: "Invitations Sent!",
       description: `${selectedGuests.length} personalized invitations are on their way.`,
     });
     
@@ -237,27 +289,23 @@ export default function GuestListBuilder() {
                   <InsightsPanel analysis={analysis} />
                 </TabsContent>
 
-                <TabsContent value="availability" className="flex-1 flex flex-col gap-4 mt-0">
-                  <AvailabilityPicker 
-                    availability={userAvailability} 
-                    onChange={setUserAvailability} 
-                  />
+                <TabsContent value="availability" className="flex-1 flex flex-col gap-4 mt-0 overflow-y-auto">
                   <AvailabilityHeatmap 
                     guests={selectedGuests} 
-                    userAvailability={userAvailability} 
+                    suggestedTime={suggestedTime}
                   />
                 </TabsContent>
               </Tabs>
 
               {/* Actions */}
-              <div className="flex gap-3 mt-4">
+              <div className="flex flex-col gap-3 mt-4">
+                {/* Auto Curate Button */}
                 <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={handleOptimize}
-                  disabled={selectedGuests.length < 3 || isOptimizing}
+                  className="w-full glow-primary"
+                  onClick={handleAutoCurate}
+                  disabled={isCurating}
                 >
-                  {isOptimizing ? (
+                  {isCurating ? (
                     <>
                       <motion.div
                         animate={{ rotate: 360 }}
@@ -266,24 +314,52 @@ export default function GuestListBuilder() {
                       >
                         <Sparkles className="w-4 h-4" />
                       </motion.div>
-                      Optimizing...
+                      Curating...
                     </>
                   ) : (
                     <>
-                      <Wand2 className="w-4 h-4 mr-2" />
-                      Optimize Guest List
+                      <Zap className="w-4 h-4 mr-2" />
+                      Auto-Curate Event
                     </>
                   )}
                 </Button>
-                
-                <Button
-                  className="flex-1 glow-primary"
-                  onClick={() => setShowInviteModal(true)}
-                  disabled={selectedGuests.length === 0}
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  Send Invites
-                </Button>
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={handleOptimize}
+                    disabled={selectedGuests.length < 3 || isOptimizing}
+                  >
+                    {isOptimizing ? (
+                      <>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                          className="mr-2"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                        </motion.div>
+                        Optimizing...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="w-4 h-4 mr-2" />
+                        Optimize List
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowInviteModal(true)}
+                    disabled={selectedGuests.length === 0}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Invites
+                  </Button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -300,6 +376,11 @@ export default function GuestListBuilder() {
             </DialogTitle>
             <DialogDescription>
               AI will personalize each invitation based on shared interests
+              {suggestedTime && (
+                <span className="block mt-1 text-primary">
+                  Event scheduled for {suggestedTime.day} at {suggestedTime.slot}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
 
