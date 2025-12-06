@@ -1,4 +1,4 @@
-import { CommunicationProfile, Event, Guest } from '@/types/event';
+import { CommunicationProfile, Event } from '@/types/event';
 
 const avatars = [
   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
@@ -23,11 +23,21 @@ const avatars = [
   'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
 ];
 
-const interestsPool = [
-  'AI/ML', 'Startups', 'Venture Capital', 'Design', 'Product', 'Engineering',
-  'Marketing', 'Sales', 'Finance', 'Crypto', 'Web3', 'Climate Tech',
-  'Healthcare', 'EdTech', 'Gaming', 'Music', 'Photography', 'Travel',
-  'Fitness', 'Food & Wine', 'Art', 'Philosophy', 'Books', 'Podcasts'
+const schools = [
+  'Stanford University', 'MIT', 'Harvard University', 'Yale University', 
+  'UC Berkeley', 'Columbia University', 'NYU', 'Princeton University',
+  'University of Michigan', 'UCLA'
+];
+
+const roles = [
+  'Founder & CEO', 'Software Engineer', 'Product Manager', 'Designer',
+  'Venture Partner', 'Student', 'Consultant', 'Marketing Director',
+  'Data Scientist', 'Operations Lead'
+];
+
+const companies = [
+  'Stealth Startup', 'Google', 'Meta', 'Stripe', 'OpenAI', 'Anthropic',
+  'a16z', 'Sequoia', 'YC', 'Series'
 ];
 
 const names = [
@@ -37,56 +47,70 @@ const names = [
   'Charlotte Moore', 'Ethan Jackson', 'Amelia White', 'Alexander Harris', 'Harper Martin'
 ];
 
-function getRandomInterests(): string[] {
-  const count = Math.floor(Math.random() * 4) + 2;
-  const shuffled = [...interestsPool].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-}
-
-function getRandomConversationStyle(): 'listener' | 'balanced' | 'dominator' {
-  const styles: ('listener' | 'balanced' | 'dominator')[] = ['listener', 'balanced', 'balanced', 'balanced', 'dominator'];
-  return styles[Math.floor(Math.random() * styles.length)];
-}
-
-function getRandomResponseSpeed(): 'fast' | 'medium' | 'slow' {
-  const speeds: ('fast' | 'medium' | 'slow')[] = ['fast', 'fast', 'medium', 'medium', 'slow'];
-  return speeds[Math.floor(Math.random() * speeds.length)];
-}
+const bios = [
+  "Building the future of social networking. Previously founded 2 startups.",
+  "Stanford CS grad passionate about AI and startups. Let's connect!",
+  "Product at Google, angel investor on the side. Love meeting new founders.",
+  "Designer turned founder. Building tools for creators.",
+  "VC at a16z. Always looking for the next big thing.",
+  "NYU student studying CS and Economics. Working on impactful projects.",
+  "Former McKinsey, now helping startups scale operations.",
+  "Full-stack engineer who loves building products people actually use.",
+  "Marketing leader with 10+ years in tech. Passionate about growth.",
+  "Data scientist exploring the intersection of AI and healthcare.",
+];
 
 export const mockProfiles: CommunicationProfile[] = names.map((name, index) => {
-  // Make Marcus and Lisa dominators for the demo
-  const isDominator = name === 'Marcus Chen' || name === 'Lisa Rodriguez';
+  const genders: ('male' | 'female' | 'other')[] = ['male', 'female', 'male', 'female', 'male', 'female', 'male', 'female', 'male', 'female', 'male', 'female', 'male', 'female', 'male', 'female', 'male', 'female', 'male', 'female'];
   
   return {
     userId: `user-${index + 1}`,
     name,
     avatar: avatars[index],
-    interests: getRandomInterests(),
-    responseSpeed: getRandomResponseSpeed(),
-    socialCatalystScore: isDominator ? 4 + Math.random() * 2 : 5 + Math.random() * 5,
-    participationRate: 0.4 + Math.random() * 0.5,
-    conversationStyle: isDominator ? 'dominator' : getRandomConversationStyle()
+    age: 21 + Math.floor(Math.random() * 15),
+    gender: genders[index],
+    school: schools[index % schools.length],
+    role: roles[index % roles.length],
+    company: companies[index % companies.length],
+    bio: bios[index % bios.length],
+    connectionDegree: (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3,
+    alreadyKnow: Math.random() > 0.7,
+    linkedinUrl: `https://linkedin.com/in/${name.toLowerCase().replace(' ', '-')}`
   };
 });
 
-// Make specific profiles for demo narrative
+// Make some profiles more interesting for demo
 mockProfiles[0] = {
   ...mockProfiles[0],
-  conversationStyle: 'dominator',
-  socialCatalystScore: 4.2
+  age: 28,
+  role: 'Founder & CEO',
+  company: 'Stealth Startup',
+  school: 'Stanford University',
+  connectionDegree: 2,
+  alreadyKnow: false,
+  bio: "Serial entrepreneur, 2x founder. Building the future of social networking."
 };
 
 mockProfiles[1] = {
   ...mockProfiles[1],
-  conversationStyle: 'dominator',
-  socialCatalystScore: 3.8
+  age: 26,
+  role: 'Venture Partner',
+  company: 'a16z',
+  school: 'Harvard University',
+  connectionDegree: 3,
+  alreadyKnow: false,
+  bio: "VC at a16z focused on consumer and social. Previously PM at Meta."
 };
 
-// Make Alex a social catalyst
 mockProfiles[2] = {
   ...mockProfiles[2],
-  conversationStyle: 'balanced',
-  socialCatalystScore: 9.2
+  age: 21,
+  role: 'Student',
+  company: 'NYU',
+  school: 'NYU',
+  connectionDegree: 1,
+  alreadyKnow: true,
+  bio: "I'm Alex, 21, building impactful stuff while studying CS at NYU. Let's change the world!"
 };
 
 export const mockEvents: Event[] = [
@@ -114,30 +138,40 @@ export const mockEvents: Event[] = [
   }
 ];
 
-// Pre-calculated pairwise chemistry for demo
+// Pre-calculated pairwise chemistry for demo based on new criteria
 export const pairwiseChemistryMap: Record<string, number> = {};
 
-// Generate pairwise scores
+// Generate pairwise scores based on new criteria
 mockProfiles.forEach((profile1, i) => {
   mockProfiles.forEach((profile2, j) => {
     if (i < j) {
       const key = `${profile1.userId}_${profile2.userId}`;
-      // Marcus and Lisa have low chemistry with each other and others
-      if (profile1.name === 'Marcus Chen' || profile2.name === 'Marcus Chen' ||
-          profile1.name === 'Lisa Rodriguez' || profile2.name === 'Lisa Rodriguez') {
-        if ((profile1.name === 'Marcus Chen' && profile2.name === 'Lisa Rodriguez') ||
-            (profile1.name === 'Lisa Rodriguez' && profile2.name === 'Marcus Chen')) {
-          pairwiseChemistryMap[key] = 35 + Math.random() * 15; // Very low
-        } else {
-          pairwiseChemistryMap[key] = 55 + Math.random() * 20; // Low-medium
-        }
-      } else {
-        // Normal chemistry calculation
-        const sharedInterests = profile1.interests.filter(i => profile2.interests.includes(i)).length;
-        const baseScore = 70 + sharedInterests * 5;
-        const catalystBonus = (profile1.socialCatalystScore + profile2.socialCatalystScore) / 4;
-        pairwiseChemistryMap[key] = Math.min(98, baseScore + catalystBonus + Math.random() * 10);
-      }
+      
+      let score = 60; // Base score
+      
+      // Same school bonus
+      if (profile1.school === profile2.school) score += 15;
+      
+      // Similar age bonus (within 5 years)
+      if (Math.abs(profile1.age - profile2.age) <= 5) score += 10;
+      
+      // Same gender slight bonus
+      if (profile1.gender === profile2.gender) score += 5;
+      
+      // Already know each other - big bonus
+      if (profile1.alreadyKnow && profile2.alreadyKnow) score += 10;
+      
+      // 1st degree connections are better
+      if (profile1.connectionDegree === 1 || profile2.connectionDegree === 1) score += 8;
+      else if (profile1.connectionDegree === 2 || profile2.connectionDegree === 2) score += 4;
+      
+      // Same industry/role type bonus
+      if (profile1.role === profile2.role) score += 5;
+      
+      // Add some randomness
+      score += Math.random() * 10 - 5;
+      
+      pairwiseChemistryMap[key] = Math.min(98, Math.max(45, Math.round(score)));
     }
   });
 });

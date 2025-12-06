@@ -35,10 +35,12 @@ export default function GuestListBuilder() {
   const filteredProfiles = useMemo(() => {
     return mockProfiles.filter(profile => {
       const matchesSearch = profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        profile.interests.some(i => i.toLowerCase().includes(searchQuery.toLowerCase()));
+        profile.school.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        profile.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        profile.company.toLowerCase().includes(searchQuery.toLowerCase());
       
       if (selectedFilter) {
-        return matchesSearch && profile.interests.includes(selectedFilter);
+        return matchesSearch && profile.school === selectedFilter;
       }
       return matchesSearch;
     });
@@ -48,10 +50,10 @@ export default function GuestListBuilder() {
     return calculateGroupChemistry(selectedGuests);
   }, [selectedGuests]);
 
-  const allInterests = useMemo(() => {
-    const interests = new Set<string>();
-    mockProfiles.forEach(p => p.interests.forEach(i => interests.add(i)));
-    return Array.from(interests).slice(0, 8);
+  const allSchools = useMemo(() => {
+    const schools = new Set<string>();
+    mockProfiles.forEach(p => schools.add(p.school));
+    return Array.from(schools).slice(0, 6);
   }, []);
 
   const toggleGuest = (profile: CommunicationProfile) => {
@@ -145,7 +147,7 @@ export default function GuestListBuilder() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by name or interests..."
+                  placeholder="Search by name, school, role..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -154,14 +156,14 @@ export default function GuestListBuilder() {
               
               <div className="flex items-center gap-2 overflow-x-auto pb-2">
                 <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-                {allInterests.map(interest => (
+                {allSchools.map(school => (
                   <Badge
-                    key={interest}
-                    variant={selectedFilter === interest ? "default" : "outline"}
-                    className="cursor-pointer whitespace-nowrap"
-                    onClick={() => setSelectedFilter(selectedFilter === interest ? null : interest)}
+                    key={school}
+                    variant={selectedFilter === school ? "default" : "outline"}
+                    className="cursor-pointer whitespace-nowrap text-xs"
+                    onClick={() => setSelectedFilter(selectedFilter === school ? null : school)}
                   >
-                    {interest}
+                    {school}
                   </Badge>
                 ))}
               </div>
@@ -288,7 +290,7 @@ export default function GuestListBuilder() {
               <p className="text-sm font-medium mb-2">Sample Message Preview:</p>
               <p className="text-sm text-muted-foreground italic">
                 "Hey {selectedGuests[0]?.name.split(' ')[0] || 'there'}! You're invited to an exclusive event with fellow{' '}
-                {selectedGuests[0]?.interests[0] || 'tech'} enthusiasts. Based on your profile, we think you'd be a great fit!"
+                {selectedGuests[0]?.school || 'university'} alumni. Based on your profile, we think you'd be a great fit!"
               </p>
             </div>
           </div>

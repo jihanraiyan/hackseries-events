@@ -14,7 +14,6 @@ export interface Guest {
   userId: string;
   name: string;
   avatar: string;
-  interests: string[];
   rsvpStatus: 'pending' | 'accepted' | 'declined';
   individualChemistry: number;
 }
@@ -23,11 +22,15 @@ export interface CommunicationProfile {
   userId: string;
   name: string;
   avatar: string;
-  interests: string[];
-  responseSpeed: 'fast' | 'medium' | 'slow';
-  socialCatalystScore: number;
-  participationRate: number;
-  conversationStyle: 'listener' | 'balanced' | 'dominator';
+  age: number;
+  gender: 'male' | 'female' | 'other';
+  school: string;
+  role: string;
+  company: string;
+  bio: string;
+  connectionDegree: 1 | 2 | 3; // 1st, 2nd, 3rd connection
+  alreadyKnow: boolean;
+  linkedinUrl?: string;
 }
 
 export interface ChemistryAnalysis {

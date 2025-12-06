@@ -34,7 +34,7 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
       id: guest.userId,
       name: guest.name,
       avatar: guest.avatar,
-      chemistry: guest.socialCatalystScore * 10
+      chemistry: guest.connectionDegree === 1 ? 90 : guest.connectionDegree === 2 ? 75 : 60
     }));
 
     const links: GraphLink[] = [];

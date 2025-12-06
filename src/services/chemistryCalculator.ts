@@ -14,7 +14,7 @@ export function calculateGroupChemistry(guests: CommunicationProfile[]): Chemist
   if (guests.length === 1) {
     return {
       groupScore: 85,
-      insights: ['Add more guests to see chemistry predictions'],
+      insights: ['Add more guests to see vibe predictions'],
       warnings: [],
       pairwiseScores: {}
     };
@@ -24,37 +24,48 @@ export function calculateGroupChemistry(guests: CommunicationProfile[]): Chemist
   const warnings: string[] = [];
   const pairwiseScores: Record<string, number> = {};
 
-  // Count social catalysts (high scores)
-  const catalysts = guests.filter(g => g.socialCatalystScore > 7);
-  if (catalysts.length > 0) {
-    insights.push(`${catalysts.length} social catalyst${catalysts.length > 1 ? 's' : ''} present`);
+  // Check for people who already know each other
+  const alreadyKnowCount = guests.filter(g => g.alreadyKnow).length;
+  if (alreadyKnowCount >= 2) {
+    insights.push(`${alreadyKnowCount} people already connected`);
   }
 
-  // Check for conversation dominators
-  const dominators = guests.filter(g => g.conversationStyle === 'dominator');
-  if (dominators.length >= 2) {
-    warnings.push(`${dominators[0].name} & ${dominators[1].name} both dominate conversations`);
+  // Check for 1st degree connections
+  const firstDegree = guests.filter(g => g.connectionDegree === 1).length;
+  if (firstDegree > 0) {
+    insights.push(`${firstDegree} direct connection${firstDegree > 1 ? 's' : ''}`);
   }
 
-  // Check for listeners
-  const listeners = guests.filter(g => g.conversationStyle === 'listener');
-  if (listeners.length > guests.length * 0.6) {
-    warnings.push('Too many passive participants - energy may be low');
+  // Check school diversity
+  const schools = new Set(guests.map(g => g.school));
+  if (schools.size === 1) {
+    insights.push(`All from ${guests[0].school}`);
+  } else if (schools.size <= 3) {
+    insights.push('Great school diversity');
   }
 
-  // Check interest overlap
-  const allInterests = guests.flatMap(g => g.interests);
-  const interestCounts = allInterests.reduce((acc, interest) => {
-    acc[interest] = (acc[interest] || 0) + 1;
+  // Check age range
+  const ages = guests.map(g => g.age);
+  const ageRange = Math.max(...ages) - Math.min(...ages);
+  if (ageRange > 15) {
+    warnings.push('Wide age range - may affect dynamics');
+  } else if (ageRange <= 5) {
+    insights.push('Similar age group');
+  }
+
+  // Check gender balance
+  const genderCounts = guests.reduce((acc, g) => {
+    acc[g.gender] = (acc[g.gender] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
   
-  const sharedInterests = Object.entries(interestCounts)
-    .filter(([_, count]) => count >= Math.ceil(guests.length * 0.5))
-    .map(([interest]) => interest);
-
-  if (sharedInterests.length > 0) {
-    insights.push(`Common ground: ${sharedInterests.slice(0, 2).join(', ')}`);
+  const genderValues = Object.values(genderCounts);
+  if (genderValues.length > 1) {
+    const maxGender = Math.max(...genderValues);
+    const minGender = Math.min(...genderValues);
+    if (maxGender / minGender <= 2) {
+      insights.push('Balanced gender mix');
+    }
   }
 
   // Calculate pairwise scores
@@ -66,7 +77,7 @@ export function calculateGroupChemistry(guests: CommunicationProfile[]): Chemist
       if (i < j) {
         const key1 = `${guest1.userId}_${guest2.userId}`;
         const key2 = `${guest2.userId}_${guest1.userId}`;
-        const score = pairwiseChemistryMap[key1] || pairwiseChemistryMap[key2] || 75;
+        const score = pairwiseChemistryMap[key1] || pairwiseChemistryMap[key2] || 70;
         pairwiseScores[key1] = score;
         totalPairwiseScore += score;
         pairCount++;
@@ -75,30 +86,15 @@ export function calculateGroupChemistry(guests: CommunicationProfile[]): Chemist
   });
 
   // Calculate base score from pairwise
-  let baseScore = pairCount > 0 ? totalPairwiseScore / pairCount : 75;
+  let baseScore = pairCount > 0 ? totalPairwiseScore / pairCount : 70;
 
-  // Apply bonuses and penalties
-  const catalystBonus = catalysts.length * 3;
-  const dominatorPenalty = dominators.length >= 2 ? 15 : (dominators.length === 1 ? 5 : 0);
+  // Apply bonuses
+  const connectionBonus = firstDegree * 2;
+  const knowBonus = alreadyKnowCount * 2;
   
-  // Balance bonus
-  const balanced = guests.filter(g => g.conversationStyle === 'balanced').length;
-  const balanceRatio = balanced / guests.length;
-  const balanceBonus = balanceRatio > 0.5 ? 5 : 0;
-
-  if (balanceRatio > 0.6) {
-    insights.push('Balanced energy distribution');
-  }
-
-  // Fast responders bonus
-  const fastResponders = guests.filter(g => g.responseSpeed === 'fast').length;
-  if (fastResponders >= guests.length * 0.5) {
-    insights.push('High engagement potential');
-  }
-
   // Final calculation
   const groupScore = Math.min(98, Math.max(45, Math.round(
-    baseScore + catalystBonus - dominatorPenalty + balanceBonus
+    baseScore + connectionBonus + knowBonus
   )));
 
   return {
@@ -112,13 +108,12 @@ export function calculateGroupChemistry(guests: CommunicationProfile[]): Chemist
 export function optimizeGuestList(
   guests: CommunicationProfile[]
 ): { optimizedGuests: CommunicationProfile[]; removed: CommunicationProfile[] } {
-  // For demo: Remove dominators if there are multiple
-  const dominators = guests.filter(g => g.conversationStyle === 'dominator');
+  // For demo: Remove 3rd degree connections to improve chemistry
+  const thirdDegree = guests.filter(g => g.connectionDegree === 3 && !g.alreadyKnow);
   
-  if (dominators.length >= 2) {
-    // Remove the dominator with lower social catalyst score
-    const sortedDominators = dominators.sort((a, b) => a.socialCatalystScore - b.socialCatalystScore);
-    const toRemove = sortedDominators.slice(0, dominators.length - 1);
+  if (thirdDegree.length > 0 && guests.length > 5) {
+    // Remove up to 2 third degree connections
+    const toRemove = thirdDegree.slice(0, 2);
     const removeIds = new Set(toRemove.map(d => d.userId));
     
     return {
@@ -135,16 +130,18 @@ export function optimizeGuestList(
 }
 
 export function getIndividualChemistry(profile: CommunicationProfile): number {
-  // Base score from social catalyst score
-  const baseScore = 60 + (profile.socialCatalystScore * 3);
+  let score = 65; // Base score
   
-  // Bonus for balanced conversationalists
-  const styleBonus = profile.conversationStyle === 'balanced' ? 5 : 
-                     profile.conversationStyle === 'listener' ? 2 : -3;
+  // 1st degree connections get bonus
+  if (profile.connectionDegree === 1) score += 15;
+  else if (profile.connectionDegree === 2) score += 8;
   
-  // Fast responders get a bonus
-  const speedBonus = profile.responseSpeed === 'fast' ? 3 : 
-                     profile.responseSpeed === 'medium' ? 1 : 0;
+  // Already know them - bonus
+  if (profile.alreadyKnow) score += 10;
   
-  return Math.min(99, Math.max(50, Math.round(baseScore + styleBonus + speedBonus)));
+  // Add some randomness based on userId for consistency
+  const hash = profile.userId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+  score += (hash % 10);
+  
+  return Math.min(99, Math.max(50, Math.round(score)));
 }
