@@ -202,8 +202,8 @@ export default function GuestListBuilder() {
       const rightPanel = document.getElementById('right-panel');
       if (rightPanel) {
         setGraphSize({
-          width: Math.min(rightPanel.clientWidth - 32, 600),
-          height: 450
+          width: rightPanel.clientWidth - 48,
+          height: 400
         });
       }
     };
@@ -315,11 +315,11 @@ export default function GuestListBuilder() {
                   </div>
 
                   {/* Graph - expanded to fill space */}
-                  <div className="flex-1 min-h-[300px]">
+                  <div className="flex-1 min-h-[300px] w-full">
                     <ChemistryGraph
                       guests={selectedGuests}
                       analysis={analysis}
-                      width={graphSize.width}
+                      width={graphSize.width + 32}
                       height={Math.max(graphSize.height - 100, 300)}
                     />
                   </div>
