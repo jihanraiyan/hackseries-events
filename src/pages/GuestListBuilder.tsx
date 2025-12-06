@@ -54,6 +54,11 @@ export default function GuestListBuilder() {
   const [suggestedTime, setSuggestedTime] = useState<{ day: string; slot: string } | null>(null);
   const [activeTab, setActiveTab] = useState('chemistry');
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Load existing guests if editing an event
   useEffect(() => {
     if (eventId && existingEventGuests[eventId]) {
@@ -402,6 +407,17 @@ export default function GuestListBuilder() {
               </div>
             </div>
           </motion.div>
+        </div>
+
+        {/* Bottom Actions - Back to Edit Event */}
+        <div className="mt-8 flex justify-center">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/create-event', { state: { preserveGuests: true, selectedGuests } })}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Edit Event Details
+          </Button>
         </div>
       </main>
 
