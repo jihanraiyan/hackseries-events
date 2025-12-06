@@ -18,6 +18,7 @@ import ChemistryGraph from '@/components/ChemistryGraph';
 import ChemistryScore from '@/components/ChemistryScore';
 import GuestCard from '@/components/GuestCard';
 import InsightsPanel from '@/components/InsightsPanel';
+import ProfileView from '@/components/ProfileView';
 import { mockProfiles } from '@/data/mockEventData';
 import { CommunicationProfile } from '@/types/event';
 import { calculateGroupChemistry, optimizeGuestList } from '@/services/chemistryCalculator';
@@ -31,6 +32,7 @@ export default function GuestListBuilder() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [viewingProfile, setViewingProfile] = useState<CommunicationProfile | null>(null);
 
   const filteredProfiles = useMemo(() => {
     return mockProfiles.filter(profile => {
@@ -178,6 +180,7 @@ export default function GuestListBuilder() {
                     profile={profile}
                     isSelected={selectedGuests.some(g => g.userId === profile.userId)}
                     onToggle={() => toggleGuest(profile)}
+                    onViewProfile={() => setViewingProfile(profile)}
                     index={index}
                   />
                 ))}
@@ -320,6 +323,16 @@ export default function GuestListBuilder() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Profile View Modal */}
+      <AnimatePresence>
+        {viewingProfile && (
+          <ProfileView
+            profile={viewingProfile}
+            onClose={() => setViewingProfile(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
