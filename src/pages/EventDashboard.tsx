@@ -31,9 +31,10 @@ interface EventCardProps {
   };
   isHosted?: boolean;
   onEdit?: (id: string) => void;
+  onManageGuests?: (id: string) => void;
 }
 
-function EventCard({ event, isHosted = false, onEdit }: EventCardProps) {
+function EventCard({ event, isHosted = false, onEdit, onManageGuests }: EventCardProps) {
   const isPast = event.date < new Date();
 
   return (
@@ -102,7 +103,13 @@ function EventCard({ event, isHosted = false, onEdit }: EventCardProps) {
                       <Pencil className="w-4 h-4 mr-2" />
                       Edit Event
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={(e) => e.preventDefault()}>Manage Guests</DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => {
+                      e.preventDefault();
+                      onManageGuests?.(event.id);
+                    }}>
+                      <Users className="w-4 h-4 mr-2" />
+                      Manage Guests
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={(e) => e.preventDefault()}>Send Reminders</DropdownMenuItem>
                     <DropdownMenuItem className="text-destructive" onClick={(e) => e.preventDefault()}>Cancel Event</DropdownMenuItem>
                   </DropdownMenuContent>
@@ -194,6 +201,10 @@ export default function EventDashboard() {
     navigate(`/events/${eventId}/edit`);
   };
 
+  const handleManageGuests = (eventId: string) => {
+    navigate(`/guest-builder?eventId=${eventId}`);
+  };
+
   // Events you're invited to
   const invitedEvents = [
     {
@@ -281,7 +292,7 @@ export default function EventDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <EventCard event={event} isHosted onEdit={handleEditEvent} />
+                    <EventCard event={event} isHosted onEdit={handleEditEvent} onManageGuests={handleManageGuests} />
                   </motion.div>
                 ))}
               </div>

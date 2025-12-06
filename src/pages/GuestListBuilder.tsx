@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Sparkles, Send, Wand2, Filter, ChevronRight, Calendar, Zap } from 'lucide-react';
+import { Search, Sparkles, Send, Wand2, Filter, ChevronRight, Calendar, Zap, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,8 +28,18 @@ import { CommunicationProfile } from '@/types/event';
 import { calculateGroupChemistry, optimizeGuestList } from '@/services/chemistryCalculator';
 import { toast } from '@/hooks/use-toast';
 
+// Mock existing event guest data - in real app this would come from API
+const existingEventGuests: Record<string, string[]> = {
+  'event-1': ['user-1', 'user-2', 'user-3', 'user-5', 'user-8'],
+  'event-2': ['user-4', 'user-6', 'user-7', 'user-9', 'user-10', 'user-11', 'user-12'],
+};
+
 export default function GuestListBuilder() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const eventId = searchParams.get('eventId');
+  const isEditMode = !!eventId;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGuests, setSelectedGuests] = useState<CommunicationProfile[]>([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -43,6 +53,15 @@ export default function GuestListBuilder() {
   );
   const [suggestedTime, setSuggestedTime] = useState<{ day: string; slot: string } | null>(null);
   const [activeTab, setActiveTab] = useState('chemistry');
+
+  // Load existing guests if editing an event
+  useEffect(() => {
+    if (eventId && existingEventGuests[eventId]) {
+      const guestIds = existingEventGuests[eventId];
+      const guests = mockProfiles.filter(p => guestIds.includes(p.userId));
+      setSelectedGuests(guests);
+    }
+  }, [eventId]);
 
   const filteredProfiles = useMemo(() => {
     return mockProfiles.filter(profile => {
@@ -154,18 +173,25 @@ export default function GuestListBuilder() {
     setIsCurating(false);
   };
 
-  const handleSendInvites = async () => {
+  const handleSaveChanges = async () => {
     setIsSending(true);
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsSending(false);
     setShowInviteModal(false);
     
-    toast({
-      title: "Invitations Sent!",
-      description: `${selectedGuests.length} personalized invitations are on their way.`,
-    });
-    
-    navigate('/events');
+    if (isEditMode) {
+      toast({
+        title: "Guest List Updated!",
+        description: `Successfully updated ${selectedGuests.length} guests for this event.`,
+      });
+      navigate(`/events/${eventId}`);
+    } else {
+      toast({
+        title: "Invitations Sent!",
+        description: `${selectedGuests.length} personalized invitations are on their way.`,
+      });
+      navigate('/events');
+    }
   };
 
   // Get dimensions for the graph
@@ -200,7 +226,20 @@ export default function GuestListBuilder() {
             className="flex flex-col"
           >
             <div className="mb-4">
-              <h2 className="text-2xl font-bold mb-1">Select Guests</h2>
+              {isEditMode && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="mb-2 -ml-2"
+                  onClick={() => navigate(`/events/${eventId}`)}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-1" />
+                  Back to Event
+                </Button>
+              )}
+              <h2 className="text-2xl font-bold mb-1">
+                {isEditMode ? 'Manage Guests' : 'Select Guests'}
+              </h2>
               <p className="text-muted-foreground text-sm">
                 {selectedGuests.length} guests selected
               </p>
@@ -357,7 +396,7 @@ export default function GuestListBuilder() {
                     disabled={selectedGuests.length === 0}
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    Send Invites
+                    {isEditMode ? 'Save Changes' : 'Send Invites'}
                   </Button>
                 </div>
               </div>
@@ -371,11 +410,13 @@ export default function GuestListBuilder() {
         <DialogContent className="glass">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Send className="w-5 h-5 text-primary" />
-              Send Invitations
+              <Send className="w-5 h-5" />
+              {isEditMode ? 'Save Guest List' : 'Send Invitations'}
             </DialogTitle>
             <DialogDescription>
-              AI will personalize each invitation based on shared interests
+              {isEditMode 
+                ? 'Review and save changes to your guest list'
+                : 'AI will personalize each invitation based on shared interests'}
               {suggestedTime && (
                 <span className="block mt-1 text-primary">
                   Event scheduled for {suggestedTime.day} at {suggestedTime.slot}
@@ -423,7 +464,7 @@ export default function GuestListBuilder() {
             <Button variant="outline" onClick={() => setShowInviteModal(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSendInvites} disabled={isSending}>
+            <Button onClick={handleSaveChanges} disabled={isSending}>
               {isSending ? (
                 <>
                   <motion.div
@@ -433,11 +474,11 @@ export default function GuestListBuilder() {
                   >
                     <Sparkles className="w-4 h-4" />
                   </motion.div>
-                  Sending...
+                  {isEditMode ? 'Saving...' : 'Sending...'}
                 </>
               ) : (
                 <>
-                  Send {selectedGuests.length} Invitations
+                  {isEditMode ? 'Save Changes' : `Send ${selectedGuests.length} Invitations`}
                 </>
               )}
             </Button>
