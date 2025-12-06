@@ -32,63 +32,53 @@ export default function GuestCard({ profile, isSelected, onToggle, onViewProfile
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className={`glass rounded-lg p-4 transition-all duration-300 cursor-pointer ${
-        isSelected ? 'ring-2 ring-primary' : 'hover:bg-card/80'
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: index * 0.03 }}
+      className={`glass rounded-xl p-3 transition-all duration-300 cursor-pointer relative ${
+        isSelected ? 'ring-2 ring-primary bg-primary/10' : 'hover:bg-card/80'
       }`}
       onClick={onViewProfile}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex flex-col items-center text-center gap-2">
         <div className="relative">
           <img
             src={profile.avatar}
             alt={profile.name}
-            className="w-12 h-12 rounded-full object-cover"
+            className="w-14 h-14 rounded-full object-cover"
           />
           {profile.alreadyKnow && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-              <Users className="w-3 h-3 text-primary-foreground" />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+              <Users className="w-2.5 h-2.5 text-primary-foreground" />
             </div>
           )}
         </div>
         
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="font-semibold truncate">{profile.name}</h3>
-            <span className={`font-mono text-sm font-bold ${getChemistryColor(chemistry)}`}>
-              {chemistry}%
-            </span>
-          </div>
-          
-          <p className="text-sm text-muted-foreground truncate">
-            {profile.role} at {profile.company}
-          </p>
-          
-          <div className="flex flex-wrap gap-1 mt-1">
-            <Badge variant="secondary" className="text-xs px-2 py-0">
-              {profile.school}
-            </Badge>
-            <Badge variant="outline" className="text-xs px-2 py-0">
-              {getConnectionLabel(profile.connectionDegree)}
-            </Badge>
-            <Badge variant="outline" className="text-xs px-2 py-0">
-              {profile.age}
-            </Badge>
-          </div>
+        <div className="w-full">
+          <h3 className="font-semibold text-sm truncate">{profile.name}</h3>
+          <p className="text-xs text-muted-foreground truncate">{profile.role}</p>
+        </div>
+        
+        <div className="flex items-center gap-1.5">
+          <span className={`font-mono text-xs font-bold ${getChemistryColor(chemistry)}`}>
+            {chemistry}%
+          </span>
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+            {getConnectionLabel(profile.connectionDegree)}
+          </Badge>
         </div>
         
         <Button
-          size="icon"
+          size="sm"
           variant={isSelected ? "destructive" : "default"}
           onClick={(e) => {
             e.stopPropagation();
             onToggle();
           }}
-          className="shrink-0"
+          className="w-full h-7 text-xs"
         >
-          {isSelected ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          {isSelected ? <Minus className="w-3 h-3 mr-1" /> : <Plus className="w-3 h-3 mr-1" />}
+          {isSelected ? 'Remove' : 'Add'}
         </Button>
       </div>
     </motion.div>
