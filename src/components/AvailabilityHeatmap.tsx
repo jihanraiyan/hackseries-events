@@ -179,7 +179,7 @@ export default function AvailabilityHeatmap({ guests, suggestedTime, eventDateTi
     >
       {/* Event Date/Time Editor */}
       {eventDateTime && (
-        <div className="mb-4 p-3 bg-secondary/50 rounded-md border border-border">
+        <div className="mb-4 p-3 bg-secondary/50 rounded border border-border">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
