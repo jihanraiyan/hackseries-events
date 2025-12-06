@@ -67,7 +67,7 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
 
   const nodeCanvasObject = useCallback((node: NodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const graphNode = node as GraphNode;
-    const size = 20;
+    const size = 12;
     const isHovered = hoveredNode === graphNode.id;
     const scale = isHovered ? 1.3 : 1;
     const x = node.x ?? 0;
@@ -150,7 +150,7 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
   }
 
   return (
-    <div className="relative rounded-lg overflow-hidden bg-background/50">
+    <div className="relative overflow-visible bg-background/50">
       <ForceGraph2D
         ref={fgRef}
         graphData={graphData}
@@ -160,7 +160,7 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
         nodePointerAreaPaint={(node, color, ctx) => {
           ctx.fillStyle = color;
           ctx.beginPath();
-          ctx.arc(node.x ?? 0, node.y ?? 0, 25, 0, 2 * Math.PI);
+          ctx.arc(node.x ?? 0, node.y ?? 0, 18, 0, 2 * Math.PI);
           ctx.fill();
         }}
         linkColor={linkColor as any}
@@ -168,7 +168,8 @@ export default function ChemistryGraph({ guests, analysis, width = 500, height =
         linkCurvature={0.1}
         onNodeHover={(node) => setHoveredNode(node ? String(node.id) : null)}
         cooldownTicks={100}
-        d3VelocityDecay={0.3}
+        d3VelocityDecay={0.2}
+        d3AlphaDecay={0.02}
         backgroundColor="transparent"
         enableZoomInteraction={true}
         enablePanInteraction={true}
