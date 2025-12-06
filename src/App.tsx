@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import CreateEvent from "./pages/CreateEvent";
 import GuestListBuilder from "./pages/GuestListBuilder";
 import EventDashboard from "./pages/EventDashboard";
+import EventDetail from "./pages/EventDetail";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/guest-builder" element={<GuestListBuilder />} />
             <Route path="/events" element={<EventDashboard />} />
+            <Route path="/events/:eventId" element={<EventDetail />} />
             <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
