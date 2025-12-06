@@ -138,7 +138,7 @@ export default function AvailabilityHeatmap({ guests, suggestedTime }: Availabil
       animate={{ opacity: 1, y: 0 }}
       className="rounded-xl border bg-card p-4"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-foreground" />
           <h3 className="font-semibold text-sm">Group Availability</h3>
@@ -150,29 +150,26 @@ export default function AvailabilityHeatmap({ guests, suggestedTime }: Availabil
 
       {/* Suggested time highlight */}
       {suggestedTime && (
-        <div className="mb-4 p-3 bg-secondary rounded-xl border border-border">
+        <div className="mb-2 p-2 bg-secondary rounded-xl border border-border">
           <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-foreground" />
-            <span className="text-sm font-medium">Auto-selected Time</span>
+            <Star className="w-3 h-3 text-foreground" />
+            <span className="text-xs font-medium">Auto-selected: {suggestedTime.day} at {suggestedTime.slot}</span>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            {suggestedTime.day} at {suggestedTime.slot} - Best for your group
-          </p>
         </div>
       )}
 
       {/* Best times */}
       {bestSlots.length > 0 && !suggestedTime && (
-        <div className="mb-4 p-3 bg-secondary rounded-xl border border-border">
-          <div className="flex items-center gap-2 mb-2">
-            <Star className="w-4 h-4 text-foreground" />
-            <span className="text-xs font-medium">Best Times to Meet</span>
+        <div className="mb-2 p-2 bg-secondary rounded-xl border border-border">
+          <div className="flex items-center gap-2 mb-1">
+            <Star className="w-3 h-3 text-foreground" />
+            <span className="text-xs font-medium">Best Times</span>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1">
             {bestSlots.map((slot, i) => (
               <div
                 key={i}
-                className="px-2 py-1 bg-primary/20 rounded text-xs font-medium"
+                className="px-2 py-0.5 bg-primary/20 rounded text-[10px] font-medium"
               >
                 {slot.day} {TIME_SLOTS[slot.slotIndex]} ({slot.count}/{totalPeople})
               </div>
